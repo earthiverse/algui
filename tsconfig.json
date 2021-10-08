@@ -13,7 +13,7 @@
         "module": "ESNext",
         "moduleResolution": "node",
         "noImplicitAny": false,
-        "outDir": "build",
+        "outDir": "docs",
         "removeComments": false,
         "resolveJsonModule": true,
         "rootDir": "source",
