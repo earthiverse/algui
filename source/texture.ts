@@ -8,7 +8,7 @@ const getBaseTexture = (tileset: TilesetName): PIXI.BaseTexture => {
     let baseTexture = baseTexturesCache.get(tileset)
     if (baseTexture) return baseTexture
 
-    baseTexture = PIXI.BaseTexture.from((G as unknown as GData).tilesets[tileset].file)
+    baseTexture = PIXI.BaseTexture.from(`.${(G as unknown as GData).tilesets[tileset].file}`)
     baseTexturesCache.set(tileset, baseTexture)
     return baseTexture
 }
