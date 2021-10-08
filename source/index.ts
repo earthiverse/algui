@@ -25,10 +25,10 @@ const cull = new SpatialHash({
     dirtyTest: true,
     simpleTest: true
 })
-cull.cull(viewport.getVisibleBounds())
+cull.cull(viewport.getVisibleBounds().pad(100))
 PIXI.Ticker.shared.add(() => {
     if (viewport.dirty) {
-        cull.cull(viewport.getVisibleBounds())
+        cull.cull(viewport.getVisibleBounds().pad(100))
         viewport.dirty = false
     }
 })
