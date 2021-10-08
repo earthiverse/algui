@@ -5,6 +5,12 @@ import { GData, GGeometry, MapName } from "alclient"
 import { getTextures } from "./texture"
 import G from "./G.json"
 
+export function getMapNames(): MapName[] {
+    const maps = []
+    for (const i in (G as unknown as GData).maps) maps.push(i)
+    return maps.sort()
+}
+
 function renderTile(container: PIXI.Container, texture: PIXI.Texture, x: number, y: number) {
     const tile = new PIXI.Sprite(texture)
     tile.x = x
