@@ -15,6 +15,7 @@
         "noImplicitAny": false,
         "outDir": "build",
         "removeComments": false,
+        "resolveJsonModule": true,
         "rootDir": "source",
         "sourceMap": true,
         "watch": false
