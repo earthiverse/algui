@@ -1,3 +1,3 @@
-import * as PIXI from 'pixi.js';
+import * as PIXI from "pixi.js";
 import { MapName } from "alclient";
-export declare const getTexture: (map: MapName, index: number) => PIXI.Texture;
+export declare const getTextures: (map: MapName, index: number) => PIXI.Texture[];
