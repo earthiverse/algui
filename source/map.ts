@@ -2,11 +2,31 @@ import * as PIXI from "pixi.js"
 import { SpatialHash } from "pixi-cull"
 import { Viewport } from "pixi-viewport"
 import { GData, GGeometry, MapName } from "alclient"
-import { getTexture } from "./texture"
+import { getTextures } from "./texture"
 import G from "./G.json"
 
+function renderTile(container: PIXI.Container, texture: PIXI.Texture, x: number, y: number) {
+    const tile = new PIXI.Sprite(texture)
+    tile.x = x
+    tile.y = y
+    tile.width = texture.width
+    tile.height = texture.height
+    container.addChild(tile)
+}
+
+function renderAnimatedTile(container: PIXI.Container, textures: PIXI.Texture[], x: number, y: number) {
+    const tile = new PIXI.AnimatedSprite(textures)
+    tile.x = x
+    tile.y = y
+    tile.width = textures[0].width
+    tile.height = textures[0].height
+    tile.animationSpeed = 1 / 30
+    tile.play()
+    container.addChild(tile)
+}
+
 export function renderMap(viewport: Viewport, cull: SpatialHash, map: MapName): void {
-    const geometry: GGeometry = (G as GData).geometry[map as MapName]
+    const geometry: GGeometry = (G as unknown as GData).geometry[map as MapName]
 
     const base = new PIXI.Container()
     base.interactiveChildren = false
@@ -14,38 +34,48 @@ export function renderMap(viewport: Viewport, cull: SpatialHash, map: MapName): 
     viewport.addChild(base)
     // Draw default layer
     if (geometry.default) {
-        const texture = getTexture(map, geometry.default)
-        const tile = new PIXI.TilingSprite(texture, geometry.max_x - geometry.min_x + texture.width, geometry.max_y - geometry.min_y + texture.height)
-        tile.x = geometry.min_x
-        tile.y = geometry.min_y
-        base.addChild(tile)
+        const textures = getTextures(map, geometry.default)
+        if (textures.length == 1) {
+            const texture = textures[0]
+            for (let x = geometry.min_x; x <= geometry.max_x; x += texture.width) {
+                for (let y = geometry.min_y; y <= geometry.max_y; y += texture.height) {
+                    renderTile(base, texture, x, y)
+                }
+            }
+        } else {
+            for (let x = geometry.min_x; x <= geometry.max_x; x += textures[0].width) {
+                for (let y = geometry.min_y; y <= geometry.max_y; y += textures[0].height) {
+                    renderAnimatedTile(base, textures, x, y)
+                }
+            }
+        }
     }
 
     // Draw placements
     if (geometry.placements) {
         for (const [index, x1, y1, x2, y2] of geometry.placements) {
-            const texture = getTexture(map, index)
-
-            if (x2 != undefined) {
-                for (let x = x1; x <= x2; x += texture.width) {
-                    for (let y = y1; y <= y2; y += texture.height) {
-                    // Tiling Sprite
-                        const tile = new PIXI.Sprite(texture)
-                        tile.x = x
-                        tile.y = y
-                        tile.width = texture.width
-                        tile.height = texture.height
-                        base.addChild(tile)
+            const textures = getTextures(map, index)
+            if (textures.length == 1) {
+                const texture = textures[0]
+                if (x2 != undefined) {
+                    for (let x = x1; x <= x2; x += texture.width) {
+                        for (let y = y1; y <= y2; y += texture.height) {
+                            renderTile(base, texture, x, y)
+                        }
                     }
+                } else {
+                    renderTile(base, texture, x1, y1)
                 }
             } else {
-            // Single Sprite
-                const tile = new PIXI.Sprite(texture)
-                tile.x = x1
-                tile.y = y1
-                tile.width = texture.width
-                tile.height = texture.height
-                base.addChild(tile)
+                if (x2 != undefined) {
+                    for (let x = x1; x <= x2; x += textures[0].width) {
+                        for (let y = y1; y <= y2; y += textures[0].height) {
+                            renderAnimatedTile(base, textures, x, y)
+                        }
+                    }
+                } else {
+                    renderAnimatedTile(base, textures, x1, y1)
+                }
             }
         }
     }
@@ -59,27 +89,28 @@ export function renderMap(viewport: Viewport, cull: SpatialHash, map: MapName): 
     if (geometry.groups) {
         for (const group of geometry.groups) {
             for (const [index, x1, y1, x2, y2] of group) {
-                const texture = getTexture(map, index)
-                if (x2 != undefined) {
-                    for (let x = x1; x <= x2; x += texture.width) {
-                        for (let y = y1; y <= y2; y += texture.height) {
-                        // Tiling Sprite
-                            const tile = new PIXI.Sprite(texture)
-                            tile.x = x
-                            tile.y = y
-                            tile.width = texture.width
-                            tile.height = texture.height
-                            top.addChild(tile)
+                const textures = getTextures(map, index)
+                if (textures.length == 1) {
+                    const texture = textures[0]
+                    if (x2 != undefined) {
+                        for (let x = x1; x <= x2; x += texture.width) {
+                            for (let y = y1; y <= y2; y += texture.height) {
+                                renderTile(top, texture, x, y)
+                            }
                         }
+                    } else {
+                        renderTile(base, texture, x1, y1)
                     }
                 } else {
-                // Single Sprite
-                    const tile = new PIXI.Sprite(texture)
-                    tile.x = x1
-                    tile.y = y1
-                    tile.width = texture.width
-                    tile.height = texture.height
-                    top.addChild(tile)
+                    if (x2 != undefined) {
+                        for (let x = x1; x <= x2; x += textures[0].width) {
+                            for (let y = y1; y <= y2; y += textures[0].height) {
+                                renderAnimatedTile(top, textures, x, y)
+                            }
+                        }
+                    } else {
+                        renderAnimatedTile(base, textures, x1, y1)
+                    }
                 }
             }
         }
