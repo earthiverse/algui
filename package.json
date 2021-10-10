@@ -9,7 +9,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "alclient": "^0.8.6",
+    "@pixi/layers": "^1.0.9",
+    "alclient": "^0.8.9",
     "pixi-cull": "^2.0.1",
     "pixi-viewport": "^4.32.0",
     "pixi.js": "^6.1.3"

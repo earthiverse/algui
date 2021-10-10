@@ -1,15 +1,9 @@
 import * as PIXI from "pixi.js"
 import { SpatialHash } from "pixi-cull"
-import { Viewport } from "pixi-viewport"
+import { Layer } from "@pixi/layers"
 import { GData, GGeometry, MapName } from "alclient"
-import { getTextures } from "./texture"
+import { getMapTextures } from "./texture"
 import G from "./G.json"
-
-export function getMapNames(): MapName[] {
-    const maps = []
-    for (const i in (G as unknown as GData).maps) maps.push(i)
-    return maps.sort()
-}
 
 function renderTile(container: PIXI.Container, texture: PIXI.Texture, x: number, y: number) {
     const tile = new PIXI.Sprite(texture)
@@ -31,16 +25,16 @@ function renderAnimatedTile(container: PIXI.Container, textures: PIXI.Texture[],
     container.addChild(tile)
 }
 
-export function renderMap(viewport: Viewport, cull: SpatialHash, map: MapName): void {
+export function renderMap(container: PIXI.Container, cull: SpatialHash, map: MapName): void {
     const geometry: GGeometry = (G as unknown as GData).geometry[map as MapName]
 
-    const base = new PIXI.Container()
+    const base = new Layer()
     base.interactiveChildren = false
-    base.zIndex = -1
-    viewport.addChild(base)
+    base.zOrder = -1
+    container.addChild(base)
     // Draw default layer
     if (geometry.default) {
-        const textures = getTextures(map, geometry.default)
+        const textures = getMapTextures(map, geometry.default)
         if (textures.length == 1) {
             const texture = textures[0]
             for (let x = geometry.min_x; x <= geometry.max_x; x += texture.width) {
@@ -60,7 +54,7 @@ export function renderMap(viewport: Viewport, cull: SpatialHash, map: MapName): 
     // Draw placements
     if (geometry.placements) {
         for (const [index, x1, y1, x2, y2] of geometry.placements) {
-            const textures = getTextures(map, index)
+            const textures = getMapTextures(map, index)
             if (textures.length == 1) {
                 const texture = textures[0]
                 if (x2 != undefined) {
@@ -88,14 +82,14 @@ export function renderMap(viewport: Viewport, cull: SpatialHash, map: MapName): 
     cull.addContainer(base, true)
 
     // Draw groups
-    const top = new PIXI.Container()
+    const top = new Layer()
     top.interactiveChildren = false
-    top.zIndex = 1
-    viewport.addChild(top)
+    top.zOrder = 1
+    container.addChild(top)
     if (geometry.groups) {
         for (const group of geometry.groups) {
             for (const [index, x1, y1, x2, y2] of group) {
-                const textures = getTextures(map, index)
+                const textures = getMapTextures(map, index)
                 if (textures.length == 1) {
                     const texture = textures[0]
                     if (x2 != undefined) {
