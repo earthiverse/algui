@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 export declare type MonsterData = {
+    aa?: number;
     hp: number;
     id: string;
     going_x: number;
