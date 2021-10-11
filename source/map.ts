@@ -30,7 +30,7 @@ export function renderMap(container: PIXI.Container, cull: SpatialHash, map: Map
 
     const base = new Layer()
     base.interactiveChildren = false
-    base.zOrder = -1
+    base.zIndex = -1
     container.addChild(base)
     // Draw default layer
     if (geometry.default) {
@@ -84,7 +84,7 @@ export function renderMap(container: PIXI.Container, cull: SpatialHash, map: Map
     // Draw groups
     const top = new Layer()
     top.interactiveChildren = false
-    top.zOrder = 1
+    top.zIndex = 1
     container.addChild(top)
     if (geometry.groups) {
         for (const group of geometry.groups) {

@@ -50,7 +50,7 @@ resize()
 const text = new PIXI.Text("x: 0.00, y: 0.00", { align: "right", fill: "white", fontFamily: "Arial", fontSize: 24, lineJoin: "round", strokeThickness: 5 })
 text.x = window.innerWidth - text.width
 text.y = window.innerHeight - text.height
-text.zOrder = 2
+text.zIndex = 2
 app.stage.addChild(text)
 PIXI.Ticker.shared.add(() => {
     const mouse = app.renderer.plugins.interaction.mouse.getLocalPosition(viewport)
@@ -86,18 +86,19 @@ export function getMonsterNames(): MonsterName[] {
 const monsterGroup = new Layer()
 monsterGroup.group.enableSort = true
 monsterGroup.group.on("sort", (sprite) => {
-    sprite.zIndex = -sprite.y
+    sprite.zOrder = sprite.y
 })
-monsterGroup.zOrder = 0
+monsterGroup.zIndex = 0
 viewport.addChild(monsterGroup)
 
 let monsterID = 0
 const monsterNames = getMonsterNames()
 const monsters = new Map<string, MonsterData>()
 
-setInterval(() => {
-    const mType = monsterNames[getRandomInt(0, monsterNames.length)]
-    // const mType: MonsterName = "mummy"
+// setInterval(() => {
+for (let i = 0; i < 1000; i++) {
+    // const mType = monsterNames[getRandomInt(0, monsterNames.length)]
+    const mType: MonsterName = "mummy"
     const monster = {
         ...(G as unknown as GData).monsters[mType],
         going_x: getRandomInt(-100, 100),
@@ -110,13 +111,27 @@ setInterval(() => {
     monster.hp = 1000 // Overwrite HP
     renderMonster(monsterGroup, monster)
     monsters.set(monster.id, monster)
-}, 100)
+}
+// }, 100)
 
 setInterval(() => {
-    // Kill random monsters
-    const id = [...monsters.keys()][getRandomInt(0, monsters.size)]
-    const monster = monsters.get(id)
-    if (!monster) return
-    monster.hp = 0
-    if (monster.hp <= 0) monsters.delete(id)
-}, 100)
+    const keys = [...monsters.keys()]
+    for (const id of keys) {
+        const monster = monsters.get(id)
+        if (!monster) return
+        if (!monster.moving) {
+            monster.going_x = getRandomInt(-100, 100)
+            monster.going_y = getRandomInt(-100, 100)
+            monster.moving = true
+        }
+    }
+}, 1000)
+
+// setInterval(() => {
+//     // Kill random monsters
+//     const id = [...monsters.keys()][getRandomInt(0, monsters.size)]
+//     const monster = monsters.get(id)
+//     if (!monster) return
+//     monster.hp = 0
+//     if (monster.hp <= 0) monsters.delete(id)
+// }, 100)
