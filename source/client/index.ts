@@ -71,25 +71,32 @@ export function getMapNames(): MapName[] {
 }
 
 const mapNames = getMapNames()
+const background = new Layer()
+background.group.enableSort = false
+background.zIndex = -1
+viewport.addChild(background)
+cull.addContainer(background, true)
+
+const foreground = new Layer()
+foreground.group.enableSort = true
+foreground.group.on("sort", (sprite) => {
+    sprite.zOrder = sprite.y
+})
+foreground.zIndex = 0
+viewport.addChild(foreground)
+cull.addContainer(foreground, true)
+
 const map: MapName = mapNames[getRandomInt(0, mapNames.length)]
-renderMap(viewport, cull, map)
+renderMap(background, foreground, map)
 viewport.moveCenter(0, 0)
 viewport.setZoom(2, true)
+viewport.sortableChildren = true
 
 export function getMonsterNames(): MonsterName[] {
     const monsters = []
     for (const i in (G as unknown as GData).monsters) monsters.push(i)
     return monsters.sort()
 }
-
-// Add monsters
-const monsterGroup = new Layer()
-monsterGroup.group.enableSort = true
-monsterGroup.group.on("sort", (sprite) => {
-    sprite.zOrder = sprite.y
-})
-monsterGroup.zIndex = 0
-viewport.addChild(monsterGroup)
 
 let monsterID = 0
 const monsterNames = getMonsterNames()
@@ -109,7 +116,7 @@ for (let i = 0; i < 1000; i++) {
         y: getRandomInt(-100, 100)
     }
     monster.hp = 1000 // Overwrite HP
-    renderMonster(monsterGroup, monster)
+    renderMonster(foreground, monster)
     monsters.set(monster.id, monster)
 }
 // }, 100)

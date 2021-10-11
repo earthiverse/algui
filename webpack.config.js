@@ -6,9 +6,9 @@ const path = require("path")
 
 module.exports = {
     mode: "production",
-    entry: "./source/index.ts",
+    entry: "./source/client/index.ts",
     output: {
-        path: path.resolve(__dirname, "./docs"),
+        path: path.resolve(__dirname, "./docs/client"),
         filename: "gui.js",
     },
     plugins: [
@@ -20,7 +20,7 @@ module.exports = {
         new HTMLInlineCSSWebpackPlugin(),
         new CopyPlugin({
             patterns: [
-                { from: "./source/images", to: "./images" },
+                { from: "./source/client/images", to: "./images" },
             ],
         }),
     ],
