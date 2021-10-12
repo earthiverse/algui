@@ -53,7 +53,8 @@ function animate() {
         datum.sprite.y = datum.monster.y - datum.sprite.height
 
         // Change sprite texture based on direction
-        const direction = radsToDirection(angle)
+        let direction = datum.lastDirection
+        if (datum.monster.moving) direction = radsToDirection(angle)
         if (datum.lastDirection !== direction) {
             datum.sprite.textures = datum.textures[direction]
             // Play a random frame
@@ -63,7 +64,8 @@ function animate() {
 
         // Animate on movement
         if (!datum.monster.moving && !datum.monster.aa) {
-            datum.sprite.stop()
+            // The middle sprite is the one in the "stopped" position
+            datum.sprite.gotoAndStop(1)
         } else if (datum.monster.moving && !datum.sprite.playing) {
             datum.sprite.play()
         }
@@ -83,9 +85,9 @@ function radsToDirection(angle: number): number {
     }
 }
 
-export function renderMonster(container: PIXI.Container, monster: MonsterData): void {
+export function renderMonster(container: PIXI.Container, monster: MonsterData, initialDirection = 0): PIXI.AnimatedSprite {
     const textures = getMonsterTextures(monster.skin)
-    const lastDirection = 0
+    const lastDirection = initialDirection
     const sprite = new PIXI.AnimatedSprite(textures[lastDirection])
     container.addChild(sprite)
     const datum = {
@@ -103,4 +105,5 @@ export function renderMonster(container: PIXI.Container, monster: MonsterData): 
     datum.sprite.gotoAndPlay(Math.floor(Math.random() * (datum.sprite.totalFrames + 1)))
     datum.sprite.animationSpeed = 1 / 10
     data.set(monster.id, datum)
+    return sprite
 }

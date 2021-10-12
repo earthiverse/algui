@@ -26,6 +26,7 @@ function renderAnimatedTile(container: PIXI.Container, textures: PIXI.Texture[],
 export function renderMap(background: PIXI.Container, foreground: PIXI.Container, map: MapName): void {
     const geometry: GGeometry = (G as unknown as GData).geometry[map as MapName]
 
+    let isBackgroundAnimated = false
     // Draw default layer
     if (geometry.default) {
         const textures = getMapTextures(map, geometry.default)
@@ -37,6 +38,7 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
                 }
             }
         } else {
+            isBackgroundAnimated = true
             for (let x = geometry.min_x; x <= geometry.max_x; x += textures[0].width) {
                 for (let y = geometry.min_y; y <= geometry.max_y; y += textures[0].height) {
                     renderAnimatedTile(background, textures, x, y)
@@ -61,6 +63,7 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
                     renderTile(background, texture, x1, y1)
                 }
             } else {
+                isBackgroundAnimated = true
                 if (x2 != undefined) {
                     for (let x = x1; x <= x2; x += textures[0].width) {
                         for (let y = y1; y <= y2; y += textures[0].height) {
@@ -73,6 +76,7 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
             }
         }
     }
+    background.cacheAsBitmap = !isBackgroundAnimated
 
     // Draw groups
     if (geometry.groups) {
@@ -80,6 +84,7 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
             const groupTile = new PIXI.Container()
             let minX = Number.MAX_SAFE_INTEGER
             let minY = Number.MAX_SAFE_INTEGER
+            let isGroupAnimated = false
             for (const [index, x1, y1, x2, y2] of group) {
                 if (x1 < minX) minX = x1
                 if (y1 < minY) minY = y1
@@ -96,6 +101,7 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
                         renderTile(groupTile, texture, x1, y1)
                     }
                 } else {
+                    isGroupAnimated = true
                     if (x2 != undefined) {
                         for (let x = x1; x <= x2; x += textures[0].width) {
                             for (let y = y1; y <= y2; y += textures[0].height) {
@@ -107,6 +113,7 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
                     }
                 }
             }
+            groupTile.cacheAsBitmap = !isGroupAnimated
             groupTile.x = minX
             groupTile.y = minY
             for (const child of groupTile.children) {

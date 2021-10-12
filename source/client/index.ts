@@ -59,6 +59,12 @@ PIXI.Ticker.shared.add(() => {
     text.text = `x: ${mouse.x.toFixed(2)}, y: ${mouse.y.toFixed(2)}`
 })
 
+const explanation = new PIXI.Text("left: aa:0, center: aa:1, right: aa:default value", { align: "right", fill: "white", fontFamily: "Arial", fontSize: 24, lineJoin: "round", strokeThickness: 5 })
+explanation.x = 0
+explanation.y = 0
+explanation.zIndex = 2
+app.stage.addChild(explanation)
+
 function getRandomInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min) //The maximum is inclusive and the minimum is inclusive
 }
@@ -75,7 +81,7 @@ const background = new Layer()
 background.group.enableSort = false
 background.zIndex = -1
 viewport.addChild(background)
-cull.addContainer(background, true)
+cull.addContainer(background)
 
 const foreground = new Layer()
 foreground.group.enableSort = true
@@ -84,9 +90,10 @@ foreground.group.on("sort", (sprite) => {
 })
 foreground.zIndex = 0
 viewport.addChild(foreground)
-cull.addContainer(foreground, true)
+cull.addContainer(foreground)
 
-const map: MapName = mapNames[getRandomInt(0, mapNames.length)]
+// const map: MapName = mapNames[getRandomInt(0, mapNames.length)]
+const map = "abtesting"
 renderMap(background, foreground, map)
 viewport.moveCenter(0, 0)
 viewport.setZoom(2, true)
@@ -102,37 +109,95 @@ let monsterID = 0
 const monsterNames = getMonsterNames()
 const monsters = new Map<string, MonsterData>()
 
-// setInterval(() => {
-for (let i = 0; i < 1000; i++) {
-    // const mType = monsterNames[getRandomInt(0, monsterNames.length)]
-    const mType: MonsterName = "mummy"
-    const monster = {
-        ...(G as unknown as GData).monsters[mType],
-        going_x: getRandomInt(-100, 100),
-        going_y: getRandomInt(-100, 100),
-        id: `${monsterID++}`,
-        moving: true,
-        x: getRandomInt(-100, 100),
-        y: getRandomInt(-100, 100)
-    }
-    monster.hp = 1000 // Overwrite HP
-    renderMonster(foreground, monster)
-    monsters.set(monster.id, monster)
-}
-// }, 100)
+const startX = -375
+const startY = -500
+for (let i = 0; i < monsterNames.length; i++) {
 
-setInterval(() => {
-    const keys = [...monsters.keys()]
-    for (const id of keys) {
-        const monster = monsters.get(id)
-        if (!monster) return
-        if (!monster.moving) {
-            monster.going_x = getRandomInt(-100, 100)
-            monster.going_y = getRandomInt(-100, 100)
-            monster.moving = true
+    // Render aa:0
+    for (let j = 0; j < 4; j++) {
+        const x = startX + j * 50
+        const y = startY + i * 50
+        const sprite = {
+            ...(G as unknown as GData).monsters[monsterNames[i]],
+            aa: 0,
+            going_x: x,
+            going_y: y,
+            id: `${monsterID++}`,
+            moving: true,
+            x: x,
+            y: y
         }
+        cull.add(renderMonster(foreground, sprite, j))
+        monsters.set(sprite.id, sprite)
     }
-}, 1000)
+
+    // Render aa:1
+    for (let j = 0; j < 4; j++) {
+        const x = 300 + startX + j * 50
+        const y = startY + i * 50
+        const sprite = {
+            ...(G as unknown as GData).monsters[monsterNames[i]],
+            aa: 1,
+            going_x: x,
+            going_y: y,
+            id: `${monsterID++}`,
+            moving: true,
+            x: x,
+            y: y
+        }
+        cull.add(renderMonster(foreground, sprite, j))
+        monsters.set(sprite.id, sprite)
+    }
+
+    // Render default
+    for (let j = 0; j < 4; j++) {
+        const x = 600 + startX + j * 50
+        const y = startY + i * 50
+        const sprite = {
+            ...(G as unknown as GData).monsters[monsterNames[i]],
+            going_x: x,
+            going_y: y,
+            id: `${monsterID++}`,
+            moving: true,
+            x: x,
+            y: y
+        }
+        cull.add(renderMonster(foreground, sprite, j))
+        monsters.set(sprite.id, sprite)
+    }
+}
+
+// // setInterval(() => {
+// for (let i = 0; i < 25; i++) {
+//     const mType = monsterNames[getRandomInt(0, monsterNames.length)]
+//     // const mType: MonsterName = "mummy"
+//     const monster = {
+//         ...(G as unknown as GData).monsters[mType],
+//         going_x: getRandomInt(-100, 100),
+//         going_y: getRandomInt(-100, 100),
+//         id: `${monsterID++}`,
+//         moving: true,
+//         x: getRandomInt(-100, 100),
+//         y: getRandomInt(-100, 100)
+//     }
+//     monster.hp = 1000 // Overwrite HP
+//     renderMonster(foreground, monster)
+//     monsters.set(monster.id, monster)
+// }
+// // }, 100)
+
+// setInterval(() => {
+//     const keys = [...monsters.keys()]
+//     for (const id of keys) {
+//         const monster = monsters.get(id)
+//         if (!monster) return
+//         if (!monster.moving) {
+//             monster.going_x = getRandomInt(-100, 100)
+//             monster.going_y = getRandomInt(-100, 100)
+//             monster.moving = true
+//         }
+//     }
+// }, 1000)
 
 // setInterval(() => {
 //     // Kill random monsters

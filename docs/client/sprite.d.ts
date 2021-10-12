@@ -17,4 +17,4 @@ export declare type MonsterSpriteData = {
     sprite: PIXI.AnimatedSprite;
     textures: PIXI.Texture[][];
 };
-export declare function renderMonster(container: PIXI.Container, monster: MonsterData): void;
+export declare function renderMonster(container: PIXI.Container, monster: MonsterData, initialDirection?: number): PIXI.AnimatedSprite;
