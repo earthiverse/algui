@@ -10,7 +10,7 @@
         "declaration": true,
         "esModuleInterop": true,
         "target": "ESNext",
-        "module": "ESNext",
+        "module": "commonjs",
         "moduleResolution": "node",
         "noImplicitAny": false,
         "outDir": "docs",
