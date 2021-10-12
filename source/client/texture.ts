@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js"
-import { GData, GGeometry, MapName } from "alclient"
+import { GData, GGeometry, MapName, MonsterName } from "alclient"
 import G from "./G.json"
 
 // Base textures hold the image
@@ -65,6 +65,7 @@ export const getMonsterTextures = (skin: string): PIXI.Texture[][] => {
                     // We found it!
                     const file = sprites.file.split(/[?#]/)[0]
                     const baseTexture = getBaseTexture(spriteName, `.${file}`)
+                    const dimensions = (G as unknown as GData).dimensions[skin as MonsterName] ?? []
                     try {
                         const width = (G as unknown as GData).images[file].width / sprites.columns / 3
                         const height = (G as unknown as GData).images[file].height / sprites.rows / 4
@@ -74,7 +75,8 @@ export const getMonsterTextures = (skin: string): PIXI.Texture[][] => {
                         for (let i = 0; i < 4; i++) {
                             const direction = directions[i]
                             for (let animationFrame = 0; animationFrame < 3; animationFrame++) { // There's three frames of animation for each direction
-                                const x = (col * 3 * width) + (animationFrame * width)
+                                let x = (col * 3 * width) + (animationFrame * width)
+                                if (dimensions[2]) x += Math.min(0, dimensions[2]) // NOTE: If the images were fixed in an image editor, we wouldn't have to apply this offset.
                                 const y = (row * 4 * height) + (direction * height)
                                 const frame = new PIXI.Rectangle(x, y, width, height)
                                 const texture = new PIXI.Texture(baseTexture, frame)

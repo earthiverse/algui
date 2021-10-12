@@ -8,6 +8,7 @@ export type MonsterData = {
     going_x: number,
     going_y: number,
     moving: boolean,
+    size?: number,
     skin: string,
     speed: number,
     x: number,
@@ -100,6 +101,7 @@ export function renderMonster(container: PIXI.Container, monster: MonsterData, i
     // Update position
     datum.sprite.x = monster.x
     datum.sprite.y = monster.y
+    if (monster.size && monster.size !== 1) datum.sprite.scale.set(monster.size)
 
     // Start on a random frame
     datum.sprite.gotoAndPlay(Math.floor(Math.random() * (datum.sprite.totalFrames + 1)))

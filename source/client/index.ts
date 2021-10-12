@@ -133,7 +133,7 @@ const monsterNames = getMonsterNames()
 const monsters = new Map<string, MonsterData>()
 
 const startX = -375
-const startY = -500
+const startY = -2500
 for (let i = 0; i < monsterNames.length; i++) {
 
     // Render aa:0

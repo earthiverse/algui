@@ -6,6 +6,7 @@ export declare type MonsterData = {
     going_x: number;
     going_y: number;
     moving: boolean;
+    size?: number;
     skin: string;
     speed: number;
     x: number;
