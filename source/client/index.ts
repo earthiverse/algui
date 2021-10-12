@@ -92,6 +92,29 @@ foreground.zIndex = 0
 viewport.addChild(foreground)
 cull.addContainer(foreground)
 
+// Add lines to line up monsters
+function addLine(x1, y1, x2, y2) {
+    const graphics = new PIXI.Graphics()
+    graphics.setParent(viewport)
+    graphics.zIndex = -0.5
+    graphics.position.set(x1, y1)
+    graphics.lineStyle(1, 0xff0000).lineTo(x2 - x1, y2 - y1)
+}
+addLine(-375, -5000, -375, 5000)
+addLine(-325, -5000, -325, 5000)
+addLine(-275, -5000, -275, 5000)
+addLine(-225, -5000, -225, 5000)
+
+addLine(-75, -5000, -75, 5000)
+addLine(-25, -5000, -25, 5000)
+addLine(25, -5000, 25, 5000)
+addLine(75, -5000, 75, 5000)
+
+addLine(225, -5000, 225, 5000)
+addLine(275, -5000, 275, 5000)
+addLine(325, -5000, 325, 5000)
+addLine(375, -5000, 375, 5000)
+
 // const map: MapName = mapNames[getRandomInt(0, mapNames.length)]
 const map = "abtesting"
 renderMap(background, foreground, map)
