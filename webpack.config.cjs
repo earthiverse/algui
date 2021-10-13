@@ -8,7 +8,7 @@ const WebpackCdnPlugin = require("webpack-cdn-plugin")
 const path = require("path")
 
 module.exports = {
-    mode: "production",
+    mode: "development",
     entry: "./source/client/index.ts",
     output: {
         path: path.resolve(__dirname, "./docs/client"),

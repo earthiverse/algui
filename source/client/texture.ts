@@ -76,11 +76,25 @@ export const getMonsterTextures = (skin: string): PIXI.Texture[][] => {
                             const direction = directions[i]
                             for (let animationFrame = 0; animationFrame < 3; animationFrame++) { // There's three frames of animation for each direction
                                 const x = (col * 3 * width) + (animationFrame * width)
-                                const dx = dimensions[2] ?? 0
+                                let dx = 0
                                 let dw = 0
-                                if (dimensions[2] > 0) dw = -dimensions[2]
+                                if (dimensions[2]) {
+                                    dx += dimensions[2]
+                                }
+                                if (dimensions[0]) {
+                                    const difference = (width - dimensions[0])
+                                    dx += difference / 2
+                                    dw -= difference
+                                }
                                 const y = (row * 4 * height) + (direction * height)
-                                const frame = new PIXI.Rectangle(x + dx, y, width + dw, height)
+                                let dy = 0
+                                let dh = 0
+                                if (dimensions[1]) {
+                                    const difference = (height - dimensions[1])
+                                    dy += difference
+                                    dh -= difference
+                                }
+                                const frame = new PIXI.Rectangle(x + dx, y + dy, width + dw, height + dh)
                                 const texture = new PIXI.Texture(baseTexture, frame)
                                 textures[i].push(texture)
                             }

@@ -93,27 +93,35 @@ viewport.addChild(foreground)
 cull.addContainer(foreground)
 
 // Add lines to line up monsters
-function addLine(x1, y1, x2, y2) {
-    const graphics = new PIXI.Graphics()
-    graphics.setParent(viewport)
-    graphics.zIndex = -0.5
-    graphics.position.set(x1, y1)
-    graphics.lineStyle(1, 0xff0000).lineTo(x2 - x1, y2 - y1)
+let lines: PIXI.Graphics[] = []
+function addLine(x1, y1, x2, y2, color = 0xff0000) {
+    const graphic = new PIXI.Graphics()
+    graphic.setParent(viewport)
+    graphic.zIndex = -0.5
+    graphic.position.set(x1, y1)
+    graphic.lineStyle(1, color).lineTo(x2 - x1, y2 - y1)
+    cull.add(graphic)
+    lines.push(graphic)
 }
+function removeLines() {
+    for (const line of lines) line.destroy()
+    lines = []
+}
+
+// Add base lines
 addLine(-375, -5000, -375, 5000)
 addLine(-325, -5000, -325, 5000)
 addLine(-275, -5000, -275, 5000)
 addLine(-225, -5000, -225, 5000)
-
 addLine(-75, -5000, -75, 5000)
 addLine(-25, -5000, -25, 5000)
 addLine(25, -5000, 25, 5000)
 addLine(75, -5000, 75, 5000)
-
 addLine(225, -5000, 225, 5000)
 addLine(275, -5000, 275, 5000)
 addLine(325, -5000, 325, 5000)
 addLine(375, -5000, 375, 5000)
+lines = []
 
 // const map: MapName = mapNames[getRandomInt(0, mapNames.length)]
 const map = "abtesting"
@@ -128,9 +136,17 @@ export function getMonsterNames(): MonsterName[] {
     return monsters.sort()
 }
 
+export function addBorder(sprite: PIXI.AnimatedSprite) {
+    addLine(sprite.x, sprite.y, sprite.x + sprite.width, sprite.y, 0x00ff00)
+    addLine(sprite.x, sprite.y + sprite.height, sprite.x + sprite.width, sprite.y + sprite.height, 0x00ff00)
+    addLine(sprite.x, sprite.y, sprite.x, sprite.y + sprite.height, 0x00ff00)
+    addLine(sprite.x + sprite.width, sprite.y, sprite.x + sprite.width, sprite.y + sprite.height, 0x00ff00)
+}
+
 let monsterID = 0
 const monsterNames = getMonsterNames()
 const monsters = new Map<string, MonsterData>()
+const sprites: PIXI.AnimatedSprite[] = []
 
 const startX = -375
 const startY = -2500
@@ -140,7 +156,7 @@ for (let i = 0; i < monsterNames.length; i++) {
     for (let j = 0; j < 4; j++) {
         const x = startX + j * 50
         const y = startY + i * 50
-        const sprite = {
+        const data = {
             ...(G as unknown as GData).monsters[monsterNames[i]],
             aa: 0,
             going_x: x,
@@ -150,15 +166,17 @@ for (let i = 0; i < monsterNames.length; i++) {
             x: x,
             y: y
         }
-        cull.add(renderMonster(foreground, sprite, j))
-        monsters.set(sprite.id, sprite)
+        const sprite = renderMonster(foreground, data, j)
+        cull.add(sprite)
+        monsters.set(data.id, data)
+        sprites.push(sprite)
     }
 
     // Render aa:1
     for (let j = 0; j < 4; j++) {
         const x = 300 + startX + j * 50
         const y = startY + i * 50
-        const sprite = {
+        const data = {
             ...(G as unknown as GData).monsters[monsterNames[i]],
             aa: 1,
             going_x: x,
@@ -168,15 +186,16 @@ for (let i = 0; i < monsterNames.length; i++) {
             x: x,
             y: y
         }
-        cull.add(renderMonster(foreground, sprite, j))
-        monsters.set(sprite.id, sprite)
+        const sprite = renderMonster(foreground, data, j)
+        cull.add(sprite)
+        monsters.set(data.id, data)
     }
 
     // Render default
     for (let j = 0; j < 4; j++) {
         const x = 600 + startX + j * 50
         const y = startY + i * 50
-        const sprite = {
+        const data = {
             ...(G as unknown as GData).monsters[monsterNames[i]],
             going_x: x,
             going_y: y,
@@ -185,9 +204,14 @@ for (let i = 0; i < monsterNames.length; i++) {
             x: x,
             y: y
         }
-        cull.add(renderMonster(foreground, sprite, j))
-        monsters.set(sprite.id, sprite)
+        const sprite = renderMonster(foreground, data, j)
+        cull.add(sprite)
+        monsters.set(data.id, data)
     }
+}
+
+for (const sprite of sprites) {
+    addBorder(sprite)
 }
 
 // // setInterval(() => {

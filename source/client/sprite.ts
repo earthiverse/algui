@@ -99,9 +99,9 @@ export function renderMonster(container: PIXI.Container, monster: MonsterData, i
     }
 
     // Update position
-    datum.sprite.x = monster.x
-    datum.sprite.y = monster.y
     if (monster.size && monster.size !== 1) datum.sprite.scale.set(monster.size)
+    datum.sprite.x = monster.x - datum.sprite.width / 2
+    datum.sprite.y = monster.y - datum.sprite.height
 
     // Start on a random frame
     datum.sprite.gotoAndPlay(Math.floor(Math.random() * (datum.sprite.totalFrames + 1)))
