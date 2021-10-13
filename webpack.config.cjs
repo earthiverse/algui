@@ -11,8 +11,8 @@ module.exports = {
     mode: "production",
     entry: "./source/client/index.ts",
     output: {
-        path: path.resolve(__dirname, "./docs"),
         filename: "gui.js",
+        path: path.resolve(__dirname, "./docs")
     },
     plugins: [
         new MiniCssExtractPlugin({
@@ -41,7 +41,8 @@ module.exports = {
                     prodUrl: "https://www.unpkg.com/pixi-viewport@4.33.0/dist/viewport.min.js",
                     var: "pixi_viewport"
                 }
-            ]
+            ],
+            publicPath: ""
         }),
         new HTMLInlineCSSWebpackPlugin(),
         new CopyPlugin({
