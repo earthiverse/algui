@@ -12,7 +12,7 @@ module.exports = {
     entry: "./source/client/index.ts",
     output: {
         filename: "gui.js",
-        path: path.resolve(__dirname, "./docs")
+        path: path.resolve(__dirname, "./docs/client")
     },
     plugins: [
         new MiniCssExtractPlugin({
