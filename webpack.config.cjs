@@ -11,7 +11,7 @@ module.exports = {
     mode: "production",
     entry: "./source/client/index.ts",
     output: {
-        path: path.resolve(__dirname, "./docs/client"),
+        path: path.resolve(__dirname, "./docs"),
         filename: "gui.js",
     },
     plugins: [
