@@ -13,6 +13,236 @@ const getBaseTexture = (id: string, file: string): PIXI.BaseTexture => {
     return baseTexture
 }
 
+const cosmeticFaceTexturesCache = new Map<string, PIXI.Texture[][]>()
+export const getCosmeticFaceTextures = (skin: string) => {
+    let textures = cosmeticFaceTexturesCache.get(skin)
+    if (textures) return textures
+
+    // TODO: Implement
+    const gSprites = (G as unknown as GData).sprites
+    let found = false
+    for (const spriteName in gSprites) {
+        if (found) break
+        const sprites = gSprites[spriteName]
+        for (let row = 0; row < sprites.rows; row++) {
+            if (found) break
+            for (let col = 0; col < sprites.columns; col++) {
+                if (sprites.matrix[row][col] == skin) {
+                    // We found it!
+                    const file = sprites.file.split(/[?#]/)[0]
+                    const baseTexture = getBaseTexture(spriteName, `.${file}`)
+                    try {
+                        const width = (G as unknown as GData).images[file].width / sprites.columns
+                        const height = (G as unknown as GData).images[file].height / sprites.rows / 4
+
+                        textures = [[], [], [], []]
+                        const directions = [0, 2, 3, 1] // Rearrange to North-East-South-West order
+                        for (let i = 0; i < 4; i++) {
+                            const direction = directions[i]
+                            const animationFrame = 0
+                            const x = (col * width) + (animationFrame * width)
+                            const y = (row * 4 * height) + (direction * height)
+                            const frame = new PIXI.Rectangle(x, y, width, height)
+                            const texture = new PIXI.Texture(baseTexture, frame)
+                            textures[i].push(texture)
+                        }
+                        found = true
+                    } catch (e) {
+                        console.error(e)
+                    }
+                    break
+                }
+            }
+        }
+    }
+    cosmeticFaceTexturesCache.set(skin, textures)
+    return textures
+}
+
+const cosmeticHairTexturesCache = new Map<string, PIXI.Texture[][]>()
+export const getCosmeticHairTextures = (skin: string) => {
+    let textures = cosmeticHairTexturesCache.get(skin)
+    if (textures) return textures
+
+    // TODO: Implement
+    const gSprites = (G as unknown as GData).sprites
+    let found = false
+    for (const spriteName in gSprites) {
+        if (found) break
+        const sprites = gSprites[spriteName]
+        for (let row = 0; row < sprites.rows; row++) {
+            if (found) break
+            for (let col = 0; col < sprites.columns; col++) {
+                if (sprites.matrix[row][col] == skin) {
+                    // We found it!
+                    const file = sprites.file.split(/[?#]/)[0]
+                    const baseTexture = getBaseTexture(spriteName, `.${file}`)
+                    try {
+                        const width = (G as unknown as GData).images[file].width / sprites.columns
+                        const height = (G as unknown as GData).images[file].height / sprites.rows / 4
+
+                        textures = [[], [], [], []]
+                        const directions = [0, 2, 3, 1] // Rearrange to North-East-South-West order
+                        for (let i = 0; i < 4; i++) {
+                            const direction = directions[i]
+                            const animationFrame = 0
+                            const x = (col * width) + (animationFrame * width)
+                            const y = (row * 4 * height) + (direction * height)
+                            const frame = new PIXI.Rectangle(x, y, width, height)
+                            const texture = new PIXI.Texture(baseTexture, frame)
+                            textures[i].push(texture)
+                        }
+                        found = true
+                    } catch (e) {
+                        console.error(e)
+                    }
+                    break
+                }
+            }
+        }
+    }
+    cosmeticHairTexturesCache.set(skin, textures)
+    return textures
+}
+
+const cosmeticHatTexturesCache = new Map<string, PIXI.Texture[][]>()
+export const getCosmeticHatTextures = (skin: string) => {
+    let textures = cosmeticHatTexturesCache.get(skin)
+    if (textures) return textures
+
+    // TODO: Implement
+    const gSprites = (G as unknown as GData).sprites
+    let found = false
+    for (const spriteName in gSprites) {
+        if (found) break
+        const sprites = gSprites[spriteName]
+        for (let row = 0; row < sprites.rows; row++) {
+            if (found) break
+            for (let col = 0; col < sprites.columns; col++) {
+                if (sprites.matrix[row][col] == skin) {
+                    // We found it!
+                    const file = sprites.file.split(/[?#]/)[0]
+                    const baseTexture = getBaseTexture(spriteName, `.${file}`)
+                    try {
+                        const width = (G as unknown as GData).images[file].width / sprites.columns
+                        const height = (G as unknown as GData).images[file].height / sprites.rows / 4
+
+                        textures = [[], [], [], []]
+                        const directions = [0, 2, 3, 1] // Rearrange to North-East-South-West order
+                        for (let i = 0; i < 4; i++) {
+                            const direction = directions[i]
+                            const animationFrame = 0
+                            const x = (col * width) + (animationFrame * width)
+                            const y = (row * 4 * height) + (direction * height)
+                            const frame = new PIXI.Rectangle(x, y, width, height)
+                            const texture = new PIXI.Texture(baseTexture, frame)
+                            textures[i].push(texture)
+                        }
+                        found = true
+                    } catch (e) {
+                        console.error(e)
+                    }
+                    break
+                }
+            }
+        }
+    }
+    cosmeticHatTexturesCache.set(skin, textures)
+    return textures
+}
+
+const cosmeticHeadTexturesCache = new Map<string, PIXI.Texture[][]>()
+export const getCosmeticHeadTextures = (skin: string) => {
+    let textures = cosmeticHeadTexturesCache.get(skin)
+    if (textures) return textures
+
+    // TODO: Implement
+    const gSprites = (G as unknown as GData).sprites
+    let found = false
+    for (const spriteName in gSprites) {
+        if (found) break
+        const sprites = gSprites[spriteName]
+        for (let row = 0; row < sprites.rows; row++) {
+            if (found) break
+            for (let col = 0; col < sprites.columns; col++) {
+                if (sprites.matrix[row][col] == skin) {
+                    // We found it!
+                    const file = sprites.file.split(/[?#]/)[0]
+                    const baseTexture = getBaseTexture(spriteName, `.${file}`)
+                    try {
+                        const width = (G as unknown as GData).images[file].width / sprites.columns
+                        const height = (G as unknown as GData).images[file].height / sprites.rows / 4
+
+                        textures = [[], [], [], []]
+                        const directions = [0, 2, 3, 1] // Rearrange to North-East-South-West order
+                        for (let i = 0; i < 4; i++) {
+                            const direction = directions[i]
+                            const animationFrame = 0
+                            const x = (col * width) + (animationFrame * width)
+                            const y = (row * 4 * height) + (direction * height)
+                            const frame = new PIXI.Rectangle(x, y, width, height)
+                            const texture = new PIXI.Texture(baseTexture, frame)
+                            textures[i].push(texture)
+                        }
+                        found = true
+                    } catch (e) {
+                        console.error(e)
+                    }
+                    break
+                }
+            }
+        }
+    }
+    cosmeticHeadTexturesCache.set(skin, textures)
+    return textures
+}
+
+const cosmeticMakeupTexturesCache = new Map<string, PIXI.Texture[][]>()
+export const getCosmeticMakeupTextures = (skin: string) => {
+    let textures = cosmeticMakeupTexturesCache.get(skin)
+    if (textures) return textures
+
+    // TODO: Implement
+    const gSprites = (G as unknown as GData).sprites
+    let found = false
+    for (const spriteName in gSprites) {
+        if (found) break
+        const sprites = gSprites[spriteName]
+        for (let row = 0; row < sprites.rows; row++) {
+            if (found) break
+            for (let col = 0; col < sprites.columns; col++) {
+                if (sprites.matrix[row][col] == skin) {
+                    // We found it!
+                    const file = sprites.file.split(/[?#]/)[0]
+                    const baseTexture = getBaseTexture(spriteName, `.${file}`)
+                    try {
+                        const width = (G as unknown as GData).images[file].width / sprites.columns
+                        const height = (G as unknown as GData).images[file].height / sprites.rows / 4
+
+                        textures = [[], [], [], []]
+                        const directions = [0, 2, 3, 1] // Rearrange to North-East-South-West order
+                        for (let i = 0; i < 4; i++) {
+                            const direction = directions[i]
+                            const animationFrame = 0
+                            const x = (col * width) + (animationFrame * width)
+                            const y = (row * 4 * height) + (direction * height)
+                            const frame = new PIXI.Rectangle(x, y, width, height)
+                            const texture = new PIXI.Texture(baseTexture, frame)
+                            textures[i].push(texture)
+                        }
+                        found = true
+                    } catch (e) {
+                        console.error(e)
+                    }
+                    break
+                }
+            }
+        }
+    }
+    cosmeticMakeupTexturesCache.set(skin, textures)
+    return textures
+}
+
 // Textures hold a region of the base texture
 const mapTexturesCache = new Map<MapName, Map<number, PIXI.Texture[]>>()
 export const getMapTextures = (map: MapName, index: number): PIXI.Texture[] => {
@@ -47,9 +277,39 @@ export const getMapTextures = (map: MapName, index: number): PIXI.Texture[] => {
     }
 }
 
-const monsterTexturesCache = new Map<string, PIXI.Texture[][]>()
-export const getMonsterTextures = (skin: string): PIXI.Texture[][] => {
-    let textures = monsterTexturesCache.get(skin)
+const skinColorTexturesCache = new Map<string, PIXI.Texture[][]>()
+export const getSkinColorTextures = (headSkin: string) => {
+    let textures = skinColorTexturesCache.get(headSkin)
+    if (textures) return textures
+
+    const gSprites = (G as unknown as GData).sprites
+    let found = false
+    for (const spriteName in gSprites) {
+        if (found) break
+        const sprites = gSprites[spriteName]
+        for (let row = 0; row < sprites.rows; row++) {
+            if (found) break
+            for (let col = 0; col < sprites.columns; col++) {
+                if (sprites.matrix[row][col] == headSkin) {
+                    // We found it!
+                    const size = sprites.size ?? "normal"
+                    const options = (G as unknown as GData).cosmetics.head[headSkin] ?? ["sskin1a", "mskin1a", "lskin1a"]
+                    if (size == "small") textures = getSkinTextures(options[0])
+                    else if (size == "normal") textures = getSkinTextures(options[1])
+                    else if (size == "large") textures = getSkinTextures(options[2])
+                    found = true
+                    break
+                }
+            }
+        }
+    }
+    skinColorTexturesCache.set(headSkin, textures)
+    return textures
+}
+
+const skinTexturesCache = new Map<string, PIXI.Texture[][]>()
+export const getSkinTextures = (skin: string): PIXI.Texture[][] => {
+    let textures = skinTexturesCache.get(skin)
     if (textures) return textures
 
     // Make the textures
@@ -109,6 +369,25 @@ export const getMonsterTextures = (skin: string): PIXI.Texture[][] => {
             }
         }
     }
-    monsterTexturesCache.set(skin, textures)
+    skinTexturesCache.set(skin, textures)
     return textures
+}
+
+export function getSkinType(skin: string): string {
+    // Make the textures
+    const gSprites = (G as unknown as GData).sprites
+    const found = false
+    for (const spriteName in gSprites) {
+        if (found) break
+        const sprites = gSprites[spriteName]
+        for (let row = 0; row < sprites.rows; row++) {
+            if (found) break
+            for (let col = 0; col < sprites.columns; col++) {
+                if (sprites.matrix[row][col] == skin) {
+                    // We found it!
+                    return sprites.type ?? "full"
+                }
+            }
+        }
+    }
 }

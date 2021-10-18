@@ -1,12 +1,17 @@
-import * as PIXI from "pixi.js"
-import { Layer, Stage } from "@pixi/layers"
-import { SpatialHash } from "pixi-cull"
-import { Viewport } from "pixi-viewport"
-import "./index.css"
 import { GData, MapName, MonsterName } from "alclient"
+import * as PIXI from "pixi.js"
+import { SpatialHash } from "pixi-cull"
+import { Layer, Stage } from "@pixi/layers"
+import { Viewport } from "pixi-viewport"
+import { WebfontLoaderPlugin } from "pixi-webfont-loader"
+import * as SocketIO from "socket.io-client"
+import "./index.css"
 import { renderMap } from "./map"
-import { renderMonster, MonsterData } from "./sprite"
+import { renderMonster, MonsterData, renderCharacter, CharacterData } from "./sprite"
 import G from "./G.json"
+
+// Setup web font loader
+PIXI.Loader.registerPlugin(WebfontLoaderPlugin)
 
 // These settings make PIXI work well for pixel art based games
 PIXI.settings.ROUND_PIXELS = true
@@ -33,7 +38,7 @@ const cull = new SpatialHash({
 })
 PIXI.Ticker.shared.add(() => {
     if (viewport.dirty) {
-        cull.cull(viewport.getVisibleBounds().pad(100))
+        cull.cull(viewport.getVisibleBounds().pad(25))
         viewport.dirty = false
     }
 })
@@ -46,25 +51,6 @@ function resize() {
 }
 resize()
 
-// Show x/y coordinates
-const text = new PIXI.Text("x: 0.00, y: 0.00", { align: "right", fill: "white", fontFamily: "Arial", fontSize: 24, lineJoin: "round", strokeThickness: 5 })
-text.x = window.innerWidth - text.width
-text.y = window.innerHeight - text.height
-text.zIndex = 2
-app.stage.addChild(text)
-PIXI.Ticker.shared.add(() => {
-    const mouse = app.renderer.plugins.interaction.mouse.getLocalPosition(viewport)
-    text.x = window.innerWidth - text.width
-    text.y = window.innerHeight - text.height
-    text.text = `x: ${mouse.x.toFixed(2)}, y: ${mouse.y.toFixed(2)}`
-})
-
-const explanation = new PIXI.Text("left: aa:0, center: aa:1, right: aa:default value", { align: "right", fill: "white", fontFamily: "Arial", fontSize: 24, lineJoin: "round", strokeThickness: 5 })
-explanation.x = 0
-explanation.y = 0
-explanation.zIndex = 2
-app.stage.addChild(explanation)
-
 function getRandomInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min) //The maximum is inclusive and the minimum is inclusive
 }
@@ -76,7 +62,28 @@ export function getMapNames(): MapName[] {
     return maps.sort()
 }
 
-const mapNames = getMapNames()
+// Once the webfont is loaded, render the text
+PIXI.Loader.shared.add({ name: "m5x7", url: "./assets/m5x7.woff2" }).onComplete.add(() => {
+    // Show x/y coordinates
+    const text = new PIXI.Text("x: 0.00, y: 0.00", { fill: "white", fontFamily: "m5x7", fontSize: 28, lineHeight: 28, lineJoin: "round", strokeThickness: 5 })
+    text.anchor.set(0, 0)
+    text.zIndex = 2
+    app.stage.addChild(text)
+    PIXI.Ticker.shared.add(() => {
+        const mouse = app.renderer.plugins.interaction.mouse.getLocalPosition(viewport)
+        text.x = window.innerWidth - text.width
+        text.y = window.innerHeight - text.height
+        text.text = `x: ${mouse.x.toFixed(2)}, y: ${mouse.y.toFixed(2)}`
+    })
+
+    const explanation = new PIXI.Text("left: aa:0, center: aa:1, right: aa:default value", { fill: "white", fontFamily: "m5x7", fontSize: 28, lineHeight: 28, lineJoin: "round", strokeThickness: 5 })
+    explanation.x = 0
+    explanation.y = 0
+    explanation.zIndex = 2
+    app.stage.addChild(explanation)
+})
+PIXI.Loader.shared.load()
+
 const background = new Layer()
 background.group.enableSort = false
 background.zIndex = -1
@@ -127,7 +134,7 @@ lines = []
 const map = "abtesting"
 renderMap(background, foreground, map)
 viewport.moveCenter(0, 0)
-viewport.setZoom(2, true)
+viewport.setZoom(8, true)
 viewport.sortableChildren = true
 
 export function getMonsterNames(): MonsterName[] {
@@ -146,6 +153,7 @@ export function addBorder(sprite: PIXI.AnimatedSprite) {
 let monsterID = 0
 const monsterNames = getMonsterNames()
 const monsters = new Map<string, MonsterData>()
+const characters = new Map<string, CharacterData>()
 const sprites: PIXI.AnimatedSprite[] = []
 
 const startX = -375
@@ -156,12 +164,14 @@ for (let i = 0; i < monsterNames.length; i++) {
     for (let j = 0; j < 4; j++) {
         const x = startX + j * 50
         const y = startY + i * 50
-        const data = {
+        const data: MonsterData = {
             ...(G as unknown as GData).monsters[monsterNames[i]],
             aa: 0,
             going_x: x,
             going_y: y,
+            hp: getRandomInt(1, 100),
             id: `${monsterID++}`,
+            max_hp: 100,
             moving: true,
             x: x,
             y: y
@@ -176,12 +186,14 @@ for (let i = 0; i < monsterNames.length; i++) {
     for (let j = 0; j < 4; j++) {
         const x = 300 + startX + j * 50
         const y = startY + i * 50
-        const data = {
+        const data: MonsterData = {
             ...(G as unknown as GData).monsters[monsterNames[i]],
             aa: 1,
             going_x: x,
             going_y: y,
+            hp: getRandomInt(1, 100),
             id: `${monsterID++}`,
+            max_hp: 100,
             moving: true,
             x: x,
             y: y
@@ -195,11 +207,13 @@ for (let i = 0; i < monsterNames.length; i++) {
     for (let j = 0; j < 4; j++) {
         const x = 600 + startX + j * 50
         const y = startY + i * 50
-        const data = {
+        const data: MonsterData = {
             ...(G as unknown as GData).monsters[monsterNames[i]],
             going_x: x,
             going_y: y,
+            hp: getRandomInt(1, 100),
             id: `${monsterID++}`,
+            max_hp: 100,
             moving: true,
             x: x,
             y: y
@@ -213,6 +227,77 @@ for (let i = 0; i < monsterNames.length; i++) {
 for (const sprite of sprites) {
     addBorder(sprite)
 }
+
+const earthiverse: CharacterData = {
+    cx: {
+        "hair": "hairdo106",
+        "makeup": "facemakeup02"
+    },
+    going_x: 150,
+    going_y: 0,
+    hp: 1000,
+    id: "earthiverse",
+    max_hp: 1000,
+    moving: false,
+    skin: "marmor5a",
+    speed: 50,
+    x: 150,
+    y: 0
+}
+const sprite2 = renderCharacter(foreground, earthiverse, 0)
+cull.add(sprite2)
+characters.set(earthiverse.id, earthiverse)
+
+const wizard: CharacterData = {
+    cx: {},
+    going_x: 175,
+    going_y: 0,
+    hp: 1000,
+    id: "Wizard",
+    max_hp: 1000,
+    moving: false,
+    skin: "wizard",
+    speed: 50,
+    x: 175,
+    y: 0
+}
+const sprite3 = renderCharacter(foreground, wizard, 0)
+cull.add(sprite3)
+characters.set(wizard.id, wizard)
+
+const kouin: CharacterData = {
+    cx: { "head": "mmakeup00", "hat": "hat221", "face": "catbatg" },
+    going_x: 200,
+    going_y: 0,
+    hp: 1000,
+    id: "kouin",
+    max_hp: 1000,
+    moving: false,
+    skin: "marmor2g",
+    speed: 50,
+    x: 200,
+    y: 0
+}
+const sprite4 = renderCharacter(foreground, kouin, 0)
+cull.add(sprite4)
+characters.set(kouin.id, kouin)
+
+const spadar: CharacterData = {
+    cx: { "hair": "hairdo403", "upper": "marmor5c", "head": "makeup117", "makeup": "facemakeup02", "hat": "hat311" },
+    going_x: 150,
+    going_y: 50,
+    hp: 1000,
+    id: "spadar",
+    max_hp: 1000,
+    moving: false,
+    skin: "marmor5c",
+    speed: 50,
+    x: 150,
+    y: 50
+}
+const sprite5 = renderCharacter(foreground, spadar, 0)
+cull.add(sprite5)
+characters.set(spadar.id, spadar)
 
 // // setInterval(() => {
 // for (let i = 0; i < 25; i++) {
@@ -254,3 +339,13 @@ for (const sprite of sprites) {
 //     monster.hp = 0
 //     if (monster.hp <= 0) monsters.delete(id)
 // }, 100)
+
+const socket = SocketIO.io({
+    autoConnect: true
+})
+socket.on("message", (message) => console.log(`We got ${message} back`))
+let i = 0
+setInterval(() => {
+    console.log(`Emitting Hello ${i}!`)
+    socket.emit("message", `Hello #${i++}!`)
+}, 1000)

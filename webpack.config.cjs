@@ -8,7 +8,7 @@ const WebpackCdnPlugin = require("webpack-cdn-plugin")
 const path = require("path")
 
 module.exports = {
-    mode: "production",
+    mode: "development",
     entry: "./source/client/index.ts",
     output: {
         filename: "gui.js",
@@ -38,16 +38,24 @@ module.exports = {
                 },
                 {
                     name: "pixi-viewport",
-                    prodUrl: "https://www.unpkg.com/pixi-viewport@4.33.0/dist/viewport.min.js",
+                    prodUrl: "https://www.unpkg.com/:name@:version/dist/viewport.min.js",
                     var: "pixi_viewport"
+                },
+                {
+                    name: "pixi-webfont-loader",
+                    prodUrl: "https://www.unpkg.com/:name@:version/dist/pixi-webfont-loader.umd.min.js",
+                    var: "PIXI"
                 }
             ],
-            publicPath: ""
+            publicPath: "./"
         }),
-        new HTMLInlineCSSWebpackPlugin(),
+        new HTMLInlineCSSWebpackPlugin({
+            publicPath: "./"
+        }),
         new CopyPlugin({
             patterns: [
                 { from: "./source/client/images", to: "./images" },
+                { from: "./source/client/assets", to: "./assets" },
             ],
         }),
     ],
@@ -62,20 +70,16 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: [
-                    MiniCssExtractPlugin.loader,
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {
+                            publicPath: "./"
+                        },
+                    },
                     "css-loader"
                 ],
                 exclude: /node_modules/
-            },
-            {
-                test: /\.(png|jpe?g|gif|svg|woff|woff2|eot|ttf|otf|mp3|ogg|mp4)$/,
-                loader: "file-loader",
-                options: {
-                    name: "[path][name].[ext]",
-                    context: "public",
-                },
-                exclude: /node_modules/
-            },
+            }
         ]
     },
     resolve: {
