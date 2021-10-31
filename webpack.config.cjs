@@ -29,12 +29,8 @@ module.exports = {
                 },
                 {
                     name: "@pixi/layers",
-                    prodUrl: "https://unpkg.com/:name@:version/dist/pixi-layers.umd.min.js",
+                    prodUrl: "https://unpkg.com/:name@:version/dist/pixi-layers.umd.js",
                     var: "PIXI.display"
-                },
-                {
-                    name: "pixi-cull",
-                    var: "Cull"
                 },
                 {
                     name: "pixi-viewport",

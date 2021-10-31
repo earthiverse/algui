@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js"
 import { GData, GGeometry, MapName } from "alclient"
 import { getMapTextures } from "./texture"
-import G from "./G.json"
+import G from "../G.json"
 
 function renderTile(container: PIXI.Container, texture: PIXI.Texture, x: number, y: number) {
     const tile = new PIXI.Sprite(texture)
@@ -10,6 +10,7 @@ function renderTile(container: PIXI.Container, texture: PIXI.Texture, x: number,
     tile.width = texture.width
     tile.height = texture.height
     container.addChild(tile)
+    return tile
 }
 
 function renderAnimatedTile(container: PIXI.Container, textures: PIXI.Texture[], x: number, y: number) {
@@ -21,12 +22,48 @@ function renderAnimatedTile(container: PIXI.Container, textures: PIXI.Texture[],
     tile.animationSpeed = 1 / 30
     tile.play()
     container.addChild(tile)
+    return tile
 }
+
+const mapCache = new Map<string, {
+    background: {
+        animated: boolean
+        tiles: PIXI.Container[]
+    }
+    foreground: {
+        tiles: PIXI.Container[]
+    }
+}>()
 
 export function renderMap(background: PIXI.Container, foreground: PIXI.Container, map: MapName): void {
     const geometry: GGeometry = (G as unknown as GData).geometry[map as MapName]
 
-    let isBackgroundAnimated = false
+    const cache = mapCache.get(map)
+    if (cache) {
+        for (const tile of cache.background.tiles) background.addChild(tile)
+        background.cacheAsBitmap = !cache.background.animated
+        for (const tile of cache.foreground.tiles) foreground.addChild(tile)
+        return
+    }
+
+    const data: {
+        background: {
+            animated: boolean
+            tiles: PIXI.Container[]
+        }
+        foreground: {
+            tiles: PIXI.Container[]
+        }
+    } = {
+        background: {
+            animated: false,
+            tiles: new Array(100000)
+        },
+        foreground: {
+            tiles: new Array(100000)
+        }
+    }
+
     // Draw default layer
     if (geometry.default) {
         const textures = getMapTextures(map, geometry.default)
@@ -34,14 +71,14 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
             const texture = textures[0]
             for (let x = geometry.min_x; x <= geometry.max_x; x += texture.width) {
                 for (let y = geometry.min_y; y <= geometry.max_y; y += texture.height) {
-                    renderTile(background, texture, x, y)
+                    data.background.tiles.push(renderTile(background, texture, x, y))
                 }
             }
         } else {
-            isBackgroundAnimated = true
+            data.background.animated = true
             for (let x = geometry.min_x; x <= geometry.max_x; x += textures[0].width) {
                 for (let y = geometry.min_y; y <= geometry.max_y; y += textures[0].height) {
-                    renderAnimatedTile(background, textures, x, y)
+                    data.background.tiles.push(renderAnimatedTile(background, textures, x, y))
                 }
             }
         }
@@ -56,27 +93,27 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
                 if (x2 != undefined) {
                     for (let x = x1; x <= x2; x += texture.width) {
                         for (let y = y1; y <= y2; y += texture.height) {
-                            renderTile(background, texture, x, y)
+                            data.background.tiles.push(renderTile(background, texture, x, y))
                         }
                     }
                 } else {
-                    renderTile(background, texture, x1, y1)
+                    data.background.tiles.push(renderTile(background, texture, x1, y1))
                 }
             } else {
-                isBackgroundAnimated = true
+                data.background.animated = true
                 if (x2 != undefined) {
                     for (let x = x1; x <= x2; x += textures[0].width) {
                         for (let y = y1; y <= y2; y += textures[0].height) {
-                            renderAnimatedTile(background, textures, x, y)
+                            data.background.tiles.push(renderAnimatedTile(background, textures, x, y))
                         }
                     }
                 } else {
-                    renderAnimatedTile(background, textures, x1, y1)
+                    data.background.tiles.push(renderAnimatedTile(background, textures, x1, y1))
                 }
             }
         }
     }
-    background.cacheAsBitmap = !isBackgroundAnimated
+    background.cacheAsBitmap = !data.background.animated
 
     // Draw groups
     if (geometry.groups) {
@@ -120,6 +157,7 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
                 child.x -= minX
                 child.y -= minY
             }
+            data.foreground.tiles.push(groupTile)
             foreground.addChild(groupTile)
         }
     }

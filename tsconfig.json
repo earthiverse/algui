@@ -10,11 +10,11 @@
         "declaration": true,
         "esModuleInterop": true,
         "target": "ESNext",
-        "module": "commonjs",
+        "module": "ESNext",
         "moduleResolution": "node",
         "noImplicitAny": false,
         "outDir": "docs",
-        "removeComments": false,
+        "removeComments": true,
         "resolveJsonModule": true,
         "rootDir": "source",
         "sourceMap": true,
@@ -24,6 +24,7 @@
         "source/server"
     ],
     "exclude": [
+        "docs",
         "node_modules",
         "source/**/*.test.*"
     ]

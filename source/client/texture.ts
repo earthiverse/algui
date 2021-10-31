@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js"
 import { GData, GGeometry, MapName, MonsterName } from "alclient"
-import G from "./G.json"
+import G from "../G.json"
 
 // Base textures hold the image
 const baseTexturesCache = new Map<string, PIXI.BaseTexture>()

@@ -1,26 +1,144 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const http_1 = __importDefault(require("http"));
-const socket_io_1 = __importDefault(require("socket.io"));
-const port = 8888;
-const app = (0, express_1.default)();
-const server = http_1.default.createServer(app);
-// Serve the client stuff
-app.use(express_1.default.static("../client"));
-server.listen(port, () => {
-    console.log(`Server started at http://localhost:${port}`);
-});
-// Serve the socket stuff
-const io = new socket_io_1.default.Server(server);
-io.on("connection", (connection) => {
-    console.log("A CONNECTION!!!");
-    connection.on("message", function (message) {
-        console.log(message);
-        connection.emit("message", message);
+import AL from "alclient";
+import Express from "express";
+import Http from "http";
+import * as SocketIO from "socket.io";
+const app = Express();
+const server = Http.createServer(app);
+let io;
+let G;
+const tabs = new Set();
+export function startServer(port = 8080, g) {
+    G = g;
+    app.use(Express.static("../client"));
+    server.listen(port, () => {
+        console.log(`Server started at http://localhost:${port}`);
     });
-});
+    io = new SocketIO.Server(server);
+    io.on("connection", (connection) => {
+        connection.on("switchTab", (newTab) => {
+            for (const tab of tabs)
+                if (tab !== newTab)
+                    connection.leave(tab);
+            connection.join(newTab);
+        });
+        for (const tab of tabs) {
+            io.emit("newTab", tab);
+        }
+    });
+}
+export function addSocket(tabName, characterSocket) {
+    if (!tabs.has(tabName)) {
+        tabs.add(tabName);
+        io.emit("newTab", tabName);
+    }
+    characterSocket.onAny((eventName, args) => {
+        switch (eventName) {
+            case "death": {
+                const data = args;
+                io.to(tabName).emit("remove", data.id);
+                break;
+            }
+            case "entities": {
+                const data = args;
+                if (data.type == "all")
+                    io.to(tabName).emit("clear");
+                for (const monster of data.monsters) {
+                    const monsterData = {
+                        going_x: monster.going_x,
+                        going_y: monster.going_y,
+                        hp: monster.hp ?? G.monsters[monster.type].hp,
+                        id: monster.id,
+                        max_hp: monster.max_hp ?? G.monsters[monster.type].hp,
+                        moving: monster.moving,
+                        skin: monster.type,
+                        speed: monster.speed ?? G.monsters[monster.type].speed,
+                        x: monster.x,
+                        y: monster.y
+                    };
+                    io.to(tabName).emit("monster", monsterData);
+                }
+                for (const player of data.players) {
+                    const characterData = {
+                        cx: player.cx,
+                        going_x: player.going_x,
+                        going_y: player.going_y,
+                        hp: player.hp,
+                        id: player.id,
+                        max_hp: player.max_hp,
+                        moving: player.moving,
+                        skin: player.skin,
+                        speed: player.speed,
+                        x: player.x,
+                        y: player.y
+                    };
+                    io.to(tabName).emit("character", characterData);
+                }
+                break;
+            }
+            case "new_map": {
+                const data = args;
+                const mapData = {
+                    map: data.name,
+                    x: data.x,
+                    y: data.y
+                };
+                io.to(tabName).emit("map", mapData);
+                for (const monster of data.entities.monsters) {
+                    const monsterData = {
+                        going_x: monster.going_x,
+                        going_y: monster.going_y,
+                        hp: monster.hp ?? G.monsters[monster.type].hp,
+                        id: monster.id,
+                        max_hp: monster.max_hp ?? G.monsters[monster.type].hp,
+                        moving: monster.moving,
+                        skin: monster.type,
+                        speed: monster.speed ?? G.monsters[monster.type].speed,
+                        target: monster.target,
+                        x: monster.x,
+                        y: monster.y
+                    };
+                    io.to(tabName).emit("monster", monsterData);
+                }
+                for (const player of data.entities.players) {
+                    const characterData = {
+                        cx: player.cx,
+                        going_x: player.going_x,
+                        going_y: player.going_y,
+                        hp: player.hp,
+                        id: player.id,
+                        max_hp: player.max_hp,
+                        moving: player.moving,
+                        skin: player.skin,
+                        speed: player.speed,
+                        target: player.target,
+                        x: player.x,
+                        y: player.y
+                    };
+                    io.to(tabName).emit("character", characterData);
+                }
+                break;
+            }
+            case "welcome": {
+                const data = args;
+                console.log(data);
+                const mapData = {
+                    map: data.map,
+                    x: data.x,
+                    y: data.y
+                };
+                io.to(tabName).emit("map", mapData);
+                break;
+            }
+        }
+    });
+    io.to(tabName);
+}
+async function run() {
+    await AL.Game.loginJSONFile("../../credentials.json");
+    await AL.Game.getGData(true, true);
+    startServer(8080, AL.Game.G);
+    const observer = await AL.Game.startObserver("ASIA", "I");
+    addSocket("ASIA I", observer.socket);
+}
+run();
 //# sourceMappingURL=index.js.map
