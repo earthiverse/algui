@@ -107,6 +107,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         id: monster.id,
                         max_hp: monster.max_hp ?? G.monsters[monster.type].hp,
                         moving: monster.moving,
+                        size: G.monsters[monster.type].size,
                         skin: monster.type,
                         speed: monster.speed ?? G.monsters[monster.type].speed,
                         target: monster.target,

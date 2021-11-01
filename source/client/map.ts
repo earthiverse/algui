@@ -13,6 +13,14 @@ function renderTile(container: PIXI.Container, texture: PIXI.Texture, x: number,
     return tile
 }
 
+// function renderTileArea(container: PIXI.Container, texture: PIXI.Texture, x: number, y: number, width: number, height: number) {
+//     const tile = new PIXI.TilingSprite(texture, width + (width % x), height + (height % y))
+//     tile.x = x
+//     tile.y = y
+//     container.addChild(tile)
+//     return tile
+// }
+
 function renderAnimatedTile(container: PIXI.Container, textures: PIXI.Texture[], x: number, y: number) {
     const tile = new PIXI.AnimatedSprite(textures)
     tile.x = x
@@ -39,6 +47,7 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
                     renderTile(background, texture, x, y)
                 }
             }
+            // renderTileArea(background, texture, geometry.min_x, geometry.min_y, geometry.max_x - geometry.min_x, geometry.max_y - geometry.min_y)
         } else {
             isBackgroundAnimated = true
             for (let x = geometry.min_x; x <= geometry.max_x; x += textures[0].width) {
@@ -61,6 +70,7 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
                             renderTile(background, texture, x, y)
                         }
                     }
+                    // renderTileArea(background, texture, x1, y1, x2 - x1, y2 - y1)
                 } else {
                     renderTile(background, texture, x1, y1)
                 }
@@ -99,6 +109,7 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
                                 renderTile(groupTile, texture, x, y)
                             }
                         }
+                        // renderTileArea(background, texture, x1, y1, x2 - x1, y2 - y1)
                     } else {
                         renderTile(groupTile, texture, x1, y1)
                     }
