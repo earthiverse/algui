@@ -6,7 +6,7 @@ const app = Express();
 const server = Http.createServer(app);
 let io;
 let G;
-const tabs = new Set();
+const tabs = new Map();
 export function startServer(port = 8080, g) {
     G = g;
     app.use(Express.static("../client"));
@@ -16,19 +16,25 @@ export function startServer(port = 8080, g) {
     io = new SocketIO.Server(server);
     io.on("connection", (connection) => {
         connection.on("switchTab", (newTab) => {
-            for (const tab of tabs)
+            for (const [tab] of tabs)
                 if (tab !== newTab)
                     connection.leave(tab);
             connection.join(newTab);
+            const mapData = tabs.get(newTab);
+            if (mapData)
+                connection.emit("map", mapData);
         });
-        for (const tab of tabs) {
-            io.emit("newTab", tab);
-        }
+        for (const [tab] of tabs)
+            connection.emit("newTab", tab);
     });
 }
-export function addSocket(tabName, characterSocket) {
+export function addSocket(tabName, characterSocket, initialPosition = { map: "main", x: 0, y: 0 }) {
     if (!tabs.has(tabName)) {
-        tabs.add(tabName);
+        tabs.set(tabName, {
+            map: initialPosition.map,
+            x: initialPosition.x,
+            y: initialPosition.y
+        });
         io.emit("newTab", tabName);
     }
     characterSocket.onAny((eventName, args) => {
@@ -82,6 +88,7 @@ export function addSocket(tabName, characterSocket) {
                     x: data.x,
                     y: data.y
                 };
+                tabs.set(tabName, mapData);
                 io.to(tabName).emit("map", mapData);
                 for (const monster of data.entities.monsters) {
                     const monsterData = {
@@ -126,19 +133,19 @@ export function addSocket(tabName, characterSocket) {
                     x: data.x,
                     y: data.y
                 };
+                tabs.set(tabName, mapData);
                 io.to(tabName).emit("map", mapData);
                 break;
             }
         }
     });
-    io.to(tabName);
 }
 async function run() {
     await AL.Game.loginJSONFile("../../credentials.json");
     await AL.Game.getGData(true, true);
     startServer(8080, AL.Game.G);
     const observer = await AL.Game.startObserver("ASIA", "I");
-    addSocket("ASIA I", observer.socket);
+    addSocket("ASIA I", observer.socket, observer);
 }
 run();
 //# sourceMappingURL=index.js.map

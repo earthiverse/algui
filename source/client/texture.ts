@@ -261,7 +261,7 @@ export const getMapTextures = (map: MapName, index: number): PIXI.Texture[] => {
     if (gTileset.frames) {
         textures = []
         for (let i = 0; i < gTileset.frames; i++) {
-            const frame = new PIXI.Rectangle(x3 + (i * gTileset.frame_width), y3, width, height != undefined ? height : width)
+            const frame = new PIXI.Rectangle(x3 + (i * gTileset.frame_width), y3, width, height ?? width)
             textures.push(new PIXI.Texture(baseTexture, frame))
         }
         for (let i = gTileset.frames - 2; i > 0; i--) {
@@ -270,7 +270,7 @@ export const getMapTextures = (map: MapName, index: number): PIXI.Texture[] => {
         mapTextures.set(index, textures)
         return textures
     } else {
-        const frame = new PIXI.Rectangle(x3, y3, width, height != undefined ? height : width)
+        const frame = new PIXI.Rectangle(x3, y3, width, height ?? width)
         const texture = new PIXI.Texture(baseTexture, frame)
         mapTextures.set(index, [texture])
         return [texture]

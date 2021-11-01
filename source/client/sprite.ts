@@ -61,6 +61,7 @@ function animate() {
         }
         datum.sprite.x = datum.data.x - datum.sprite.width / 2
         datum.sprite.y = datum.data.y - datum.sprite.height
+        datum.sprite.zOrder = datum.sprite.y
 
         // Change sprite texture based on direction
         let direction = datum.lastDirection
@@ -115,6 +116,7 @@ function animate() {
         }
         datum.sprite.x = datum.data.x - datum.sprite.width / 2
         datum.sprite.y = datum.data.y - datum.sprite.height
+        datum.sprite.zOrder = datum.sprite.y
 
         // Change sprite texture based on direction
         let direction = datum.lastDirection
@@ -320,6 +322,7 @@ export function renderCharacter(container: PIXI.Container, character: CharacterD
     // Update position
     sprite.x = character.x - sprite.width / 2
     sprite.y = character.y - sprite.height
+    sprite.zOrder = sprite.y
 
     return sprite
 }
@@ -360,6 +363,7 @@ export function renderMonster(container: PIXI.Container, monster: MonsterData, i
     if (monster.size && monster.size !== 1) sprite.scale.set(monster.size)
     sprite.x = monster.x - sprite.width / 2
     sprite.y = monster.y - sprite.height
+    sprite.zOrder = sprite.y
 
     return sprite
 }

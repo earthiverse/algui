@@ -1,4 +1,4 @@
-import { GData, MapName } from "alclient"
+import { MapName } from "alclient"
 import * as PIXI from "pixi.js"
 import { Cull } from "@pixi-essentials/cull"
 import { Layer, Stage } from "@pixi/layers"
@@ -8,7 +8,6 @@ import * as SocketIO from "socket.io-client"
 import "./index.css"
 import { renderMap } from "./map"
 import { removeAllSprites, removeSprite, renderCharacter, renderMonster } from "./sprite"
-import G from "../G.json"
 import { MapData } from "../definitions/server"
 import { CharacterData, MonsterData } from "../definitions/client"
 
@@ -18,6 +17,7 @@ PIXI.Loader.registerPlugin(WebfontLoaderPlugin)
 // These settings make PIXI work well for pixel art based games
 PIXI.settings.ROUND_PIXELS = true
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
+PIXI.settings.GC_MODE = PIXI.GC_MODES.MANUAL
 
 // Add the view to the DOM
 const app = new PIXI.Application({
@@ -30,7 +30,6 @@ const viewport = new Viewport({
     screenHeight: window.innerHeight,
     screenWidth: window.innerWidth
 })
-viewport.sortableChildren = true
 viewport.setZoom(2, true)
 viewport.pinch().drag().decelerate()
 app.stage.addChild(viewport)
@@ -44,16 +43,15 @@ function resize() {
 resize()
 
 const cull = new Cull({
+    recursive: false,
     toggle: "visible"
 })
 cull.addAll(viewport.children)
-let cullDirty = false
 viewport.on("frame-end", function () {
     if (viewport.dirty) {
         console.log("Culling!")
         cull.cull(app.renderer.screen)
         viewport.dirty = false
-        cullDirty = false
     }
 })
 
@@ -72,18 +70,14 @@ PIXI.Loader.shared.add({ name: "m5x7", url: "./assets/m5x7.woff2" }).onComplete.
     })
 })
 PIXI.Loader.shared.load()
-
-const background = new PIXI.Container()
+let background: PIXI.Container = new PIXI.Container()
 background.interactive = false
 background.interactiveChildren = false
 background.zIndex = -1
 viewport.addChild(background)
 
-const foreground = new Layer()
+let foreground: Layer = new Layer()
 foreground.group.enableSort = true
-foreground.group.on("sort", function (sprite) {
-    sprite.zOrder = sprite.y
-})
 foreground.zIndex = 0
 viewport.addChild(foreground)
 
@@ -100,19 +94,64 @@ socket.on("newTab", (tabName: string) => {
 socket.on("clear", () => {
     removeAllSprites()
 })
+
 let lastMap: MapName = undefined
+const mapCache = new Map<MapName, {
+    background: PIXI.Container
+    foreground: Layer
+}>()
 socket.on("map", (data: MapData) => {
+    console.log(`Switching map to ${data.map},${data.x},${data.y}`)
     cull.clear()
     removeAllSprites()
     if (lastMap !== data.map) {
-        background.removeChildren()
-        foreground.removeChildren()
-        renderMap(background, foreground, data.map)
+        // Check the cache
+        foreground.group.removeAllListeners()
+        const cache = mapCache.get(data.map)
+        if (cache) {
+            background.visible = false
+            foreground.visible = false
+            viewport.removeChild(background)
+            viewport.removeChild(foreground)
+            background = cache.background
+            background.visible = true
+            foreground = cache.foreground
+            foreground.visible = true
+            foreground.group.on("sort", function (sprite) {
+                sprite.zOrder = sprite.y
+            })
+            viewport.addChild(background)
+            viewport.addChild(foreground)
+        } else {
+            if (lastMap == undefined) {
+                background.destroy()
+                foreground.destroy()
+            }
+            background = new PIXI.Container()
+            background.interactive = false
+            background.interactiveChildren = false
+            background.zIndex = -1
+            foreground = new Layer()
+            foreground.group.enableSort = true
+            foreground.group.on("sort", function (sprite) {
+                sprite.zOrder = sprite.y
+            })
+            foreground.zIndex = 0
+            renderMap(background, foreground, data.map)
+            mapCache.set(data.map, {
+                background: background,
+                foreground: foreground
+            })
+            viewport.addChild(background)
+            viewport.addChild(foreground)
+        }
+
         lastMap = data.map
     }
+    cull.addAll(background.children)
+    cull.addAll(foreground.children)
     viewport.moveCenter(data.x, data.y)
-    cull.addAll(viewport.children)
-    cullDirty = true
+    viewport.dirty = true
 })
 socket.on("monster", (data: MonsterData) => {
     renderMonster(foreground, data)

@@ -12,7 +12,7 @@ const server = Http.createServer(app)
 let io: SocketIO.Server
 
 let G: GData
-const tabs = new Set<string>()
+const tabs = new Map<string, MapData>()
 
 export function startServer(port = 8080, g: GData) {
     // Update G
@@ -27,19 +27,23 @@ export function startServer(port = 8080, g: GData) {
     io.on("connection", (connection) => {
         // Join the update channel
         connection.on("switchTab", (newTab: string) => {
-            for (const tab of tabs) if (tab !== newTab) connection.leave(tab)
+            for (const [tab] of tabs) if (tab !== newTab) connection.leave(tab)
             connection.join(newTab)
+            const mapData = tabs.get(newTab)
+            if (mapData) connection.emit("map", mapData)
         })
 
-        for (const tab of tabs) {
-            io.emit("newTab", tab)
-        }
+        for (const [tab] of tabs) connection.emit("newTab", tab)
     })
 }
 
-export function addSocket(tabName: string, characterSocket: Socket) {
+export function addSocket(tabName: string, characterSocket: Socket, initialPosition: MapData = { map: "main", x: 0, y: 0 }) {
     if (!tabs.has(tabName)) {
-        tabs.add(tabName)
+        tabs.set(tabName, {
+            map: initialPosition.map,
+            x: initialPosition.x,
+            y: initialPosition.y
+        })
         io.emit("newTab", tabName)
     }
     characterSocket.onAny((eventName, args) => {
@@ -60,6 +64,7 @@ export function addSocket(tabName: string, characterSocket: Socket) {
                         id: monster.id,
                         max_hp: monster.max_hp ?? G.monsters[monster.type].hp,
                         moving: monster.moving,
+                        size: G.monsters[monster.type].size,
                         skin: monster.type,
                         speed: monster.speed ?? G.monsters[monster.type].speed,
                         x: monster.x,
@@ -92,6 +97,7 @@ export function addSocket(tabName: string, characterSocket: Socket) {
                     x: data.x,
                     y: data.y
                 }
+                tabs.set(tabName, mapData)
                 io.to(tabName).emit("map", mapData)
                 for (const monster of data.entities.monsters) {
                     const monsterData: MonsterData = {
@@ -136,12 +142,12 @@ export function addSocket(tabName: string, characterSocket: Socket) {
                     x: data.x,
                     y: data.y
                 }
+                tabs.set(tabName, mapData)
                 io.to(tabName).emit("map", mapData)
                 break
             }
         }
     })
-    io.to(tabName)
 }
 
 // TODO: Don't call this here in the final script, call it from wherever you're going to use it
@@ -150,6 +156,6 @@ async function run() {
     await AL.Game.getGData(true, true)
     startServer(8080, AL.Game.G)
     const observer = await AL.Game.startObserver("ASIA", "I")
-    addSocket("ASIA I", observer.socket)
+    addSocket("ASIA I", observer.socket, observer)
 }
 run()
