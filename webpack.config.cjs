@@ -50,7 +50,7 @@ module.exports = {
         }),
         new CopyPlugin({
             patterns: [
-                { from: "./source/client/images", to: "./images" },
+                // { from: "./source/client/images", to: "./images" },
                 { from: "./source/client/assets", to: "./assets" },
             ],
         }),

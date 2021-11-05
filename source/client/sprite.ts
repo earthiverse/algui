@@ -25,8 +25,8 @@ const monsters = new Map<string, MonsterSpriteData>()
 const characters = new Map<string, CharacterSpriteData>()
 function animate() {
     // console.log(`Data size: ${data.size}`)
-    for (const id of [...monsters.keys()]) {
-        const datum = monsters.get(id)
+    const monstersToDelete = []
+    for (const [id, datum] of monsters) {
         // Slowly fade away on death
         if (datum.data.hp <= 0) {
             // Stop animating
@@ -40,28 +40,26 @@ function animate() {
 
             // Reduce alpha until it's 0, then destroy the sprite object
             datum.sprite.alpha = datum.sprite.alpha - 0.1
-            if (datum.sprite.alpha <= 0) {
-                datum.sprite.destroy({ children: true })
-                monsters.delete(id)
-            }
+            if (datum.sprite.alpha <= 0) monstersToDelete.push(id)
             continue
         }
 
         // Movement Computation
         const movementAngle = Math.atan2(datum.data.going_y - datum.data.y, datum.data.going_x - datum.data.x)
-        const distanceTravelled = datum.data.speed * PIXI.Ticker.shared.elapsedMS / 1000
-        const distanceToGoal = Math.hypot(datum.data.going_x - datum.data.x, datum.data.going_y - datum.data.y)
-        if (distanceTravelled > distanceToGoal) {
-            datum.data.moving = false
-            datum.data.x = datum.data.going_x
-            datum.data.y = datum.data.going_y
-        } else {
-            datum.data.x = datum.data.x + Math.cos(movementAngle) * distanceTravelled
-            datum.data.y = datum.data.y + Math.sin(movementAngle) * distanceTravelled
+        if (datum.data.moving) {
+            const distanceTravelled = datum.data.speed * PIXI.Ticker.shared.elapsedMS / 1000
+            const distanceToGoal = Math.hypot(datum.data.going_x - datum.data.x, datum.data.going_y - datum.data.y)
+            if (distanceTravelled > distanceToGoal) {
+                datum.data.moving = false
+                datum.data.x = datum.data.going_x
+                datum.data.y = datum.data.going_y
+            } else {
+                datum.data.x = datum.data.x + Math.cos(movementAngle) * distanceTravelled
+                datum.data.y = datum.data.y + Math.sin(movementAngle) * distanceTravelled
+            }
         }
         datum.sprite.x = datum.data.x - datum.sprite.width / 2
         datum.sprite.y = datum.data.y - datum.sprite.height
-        datum.sprite.zOrder = datum.sprite.y
 
         // Change sprite texture based on direction
         let direction = datum.lastDirection
@@ -82,7 +80,7 @@ function animate() {
         }
 
         // Animate on movement
-        if (!datum.data.moving && !datum.data.aa) {
+        if (!datum.data.moving && !datum.data.aa && datum.sprite.playing) {
             // The middle sprite is the one in the "stopped" position
             datum.sprite.gotoAndStop(1)
         } else if (datum.data.moving && !datum.sprite.playing) {
@@ -98,58 +96,60 @@ function animate() {
             hpBar.scale.set(1 / datum.sprite.scale.x, 1 / datum.sprite.scale.y)
         }
     }
+    for (const id of monstersToDelete) {
+        const datum = monsters.get(id)
+        if (datum) {
+            datum.sprite.destroy({ children: true })
+            monsters.delete(id)
+        }
+    }
 
-    for (const key of [...characters.keys()]) {
-        const datum = characters.get(key)
-
+    for (const [id, datum] of characters) {
         // Movement Computation
         const angle = Math.atan2(datum.data.going_y - datum.data.y, datum.data.going_x - datum.data.x)
-        const distanceTravelled = datum.data.speed * PIXI.Ticker.shared.elapsedMS / 1000
-        const distanceToGoal = Math.hypot(datum.data.going_x - datum.data.x, datum.data.going_y - datum.data.y)
-        if (distanceTravelled > distanceToGoal) {
-            datum.data.moving = false
-            datum.data.x = datum.data.going_x
-            datum.data.y = datum.data.going_y
-        } else {
-            datum.data.x = datum.data.x + Math.cos(angle) * distanceTravelled
-            datum.data.y = datum.data.y + Math.sin(angle) * distanceTravelled
+        if (datum.data.moving) {
+            const distanceTravelled = datum.data.speed * PIXI.Ticker.shared.elapsedMS / 1000
+            const distanceToGoal = Math.hypot(datum.data.going_x - datum.data.x, datum.data.going_y - datum.data.y)
+            if (distanceTravelled > distanceToGoal) {
+                datum.data.moving = false
+                datum.data.x = datum.data.going_x
+                datum.data.y = datum.data.going_y
+            } else {
+                datum.data.x = datum.data.x + Math.cos(angle) * distanceTravelled
+                datum.data.y = datum.data.y + Math.sin(angle) * distanceTravelled
+            }
         }
         datum.sprite.x = datum.data.x - datum.sprite.width / 2
         datum.sprite.y = datum.data.y - datum.sprite.height
-        datum.sprite.zOrder = datum.sprite.y
 
-        // Change sprite texture based on direction
         let direction = datum.lastDirection
         if (datum.data.target) {
+            // Change sprite texture based on target
             const target = monsters.get(datum.data.target) || characters.get(datum.data.target)
             if (target) {
                 const targetAngle = Math.atan2(target.data.y - datum.data.y, target.data.x - datum.data.x)
                 direction = radsToDirection(targetAngle)
             }
-        } else if (datum.data.moving) direction = radsToDirection(angle)
+        } else if (datum.data.moving) {
+            // Change sprite texture based on direction
+            direction = radsToDirection(angle)
+        }
         if (datum.lastDirection !== direction) {
             const randomFrame = Math.floor(Math.random() * (datum.sprite.totalFrames + 1))
             datum.sprite.textures = datum.textures[direction]
-            datum.sprite.gotoAndPlay(randomFrame)
+            datum.sprite.gotoAndStop(randomFrame)
 
             for (let i = 1; i < datum.sprite.children.length; i++) {
-                try {
-                    const child = datum.sprite.children[i] as PIXI.AnimatedSprite
-                    child.textures = datum.texturesChildren[i][direction % child.totalFrames]
-                    child.gotoAndPlay(Math.min(child.totalFrames, randomFrame))
-                } catch (e) {
-                    console.log(datum.data)
-                    console.log(`# children: ${datum.sprite.children.length}`)
-                    console.log(`# texturesChildren: ${datum.texturesChildren[i].length}`)
-                    console.error(e)
-                }
+                const child = datum.sprite.children[i] as PIXI.AnimatedSprite
+                child.textures = datum.texturesChildren[i][direction]
+                child.gotoAndStop(Math.min(child.totalFrames, randomFrame))
             }
 
             datum.lastDirection = direction
         }
 
         // Animate on movement
-        if (!datum.data.moving) {
+        if (!datum.data.moving && datum.sprite.playing) {
             // The middle sprite is the one in the "stopped" position
             datum.sprite.gotoAndStop(1)
             for (let i = 1; i < datum.sprite.children.length; i++) {
@@ -158,6 +158,10 @@ function animate() {
             }
         } else if (datum.data.moving && !datum.sprite.playing) {
             datum.sprite.play()
+            for (let i = 1; i < datum.sprite.children.length; i++) {
+                const child = datum.sprite.children[i] as PIXI.AnimatedSprite
+                child.play()
+            }
         }
 
         // Update HP Bar
@@ -228,7 +232,7 @@ export function renderCharacter(container: PIXI.Container, character: CharacterD
             textures = getSkinColorTextures(character.cx.head)
         }
         sprite = new PIXI.AnimatedSprite(textures[initialDirection])
-        container.addChild(sprite)
+
         sprite.interactive = true
         sprite.interactiveChildren = false
         const datum = {
@@ -316,13 +320,13 @@ export function renderCharacter(container: PIXI.Container, character: CharacterD
                 sprite.addChild(hat)
                 datum.texturesChildren[sprite.children.length - 1] = hatTextures
             }
+            container.addChild(sprite)
         }
     }
 
     // Update position
     sprite.x = character.x - sprite.width / 2
     sprite.y = character.y - sprite.height
-    sprite.zOrder = sprite.y
 
     return sprite
 }
@@ -363,7 +367,6 @@ export function renderMonster(container: PIXI.Container, monster: MonsterData, i
     if (monster.size && monster.size !== 1) sprite.scale.set(monster.size)
     sprite.x = monster.x - sprite.width / 2
     sprite.y = monster.y - sprite.height
-    sprite.zOrder = sprite.y
 
     return sprite
 }

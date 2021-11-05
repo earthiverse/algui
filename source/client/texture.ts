@@ -278,7 +278,7 @@ export const getMapTextures = (map: MapName, index: number): PIXI.Texture[] => {
 }
 
 const skinColorTexturesCache = new Map<string, PIXI.Texture[][]>()
-export const getSkinColorTextures = (headSkin: string) => {
+export const getSkinColorTextures = (headSkin: string): PIXI.Texture[][] => {
     let textures = skinColorTexturesCache.get(headSkin)
     if (textures) return textures
 

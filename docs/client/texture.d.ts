@@ -6,6 +6,6 @@ export declare const getCosmeticHatTextures: (skin: string) => PIXI.Texture<PIXI
 export declare const getCosmeticHeadTextures: (skin: string) => PIXI.Texture<PIXI.Resource>[][];
 export declare const getCosmeticMakeupTextures: (skin: string) => PIXI.Texture<PIXI.Resource>[][];
 export declare const getMapTextures: (map: MapName, index: number) => PIXI.Texture[];
-export declare const getSkinColorTextures: (headSkin: string) => PIXI.Texture<PIXI.Resource>[][];
+export declare const getSkinColorTextures: (headSkin: string) => PIXI.Texture[][];
 export declare const getSkinTextures: (skin: string) => PIXI.Texture[][];
 export declare function getSkinType(skin: string): string;

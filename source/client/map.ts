@@ -3,25 +3,16 @@ import { GData, GGeometry, MapName } from "alclient"
 import { getMapTextures } from "./texture"
 import G from "../G.json"
 
-function renderTile(container: PIXI.Container, texture: PIXI.Texture, x: number, y: number) {
+function createTile(texture: PIXI.Texture, x: number, y: number) {
     const tile = new PIXI.Sprite(texture)
     tile.x = x
     tile.y = y
     tile.width = texture.width
     tile.height = texture.height
-    container.addChild(tile)
     return tile
 }
 
-// function renderTileArea(container: PIXI.Container, texture: PIXI.Texture, x: number, y: number, width: number, height: number) {
-//     const tile = new PIXI.TilingSprite(texture, width + (width % x), height + (height % y))
-//     tile.x = x
-//     tile.y = y
-//     container.addChild(tile)
-//     return tile
-// }
-
-function renderAnimatedTile(container: PIXI.Container, textures: PIXI.Texture[], x: number, y: number) {
+function createAnimatedTile(textures: PIXI.Texture[], x: number, y: number) {
     const tile = new PIXI.AnimatedSprite(textures)
     tile.x = x
     tile.y = y
@@ -29,30 +20,51 @@ function renderAnimatedTile(container: PIXI.Container, textures: PIXI.Texture[],
     tile.height = textures[0].height
     tile.animationSpeed = 1 / 30
     tile.play()
-    container.addChild(tile)
     return tile
 }
 
-export function renderMap(background: PIXI.Container, foreground: PIXI.Container, map: MapName): void {
+export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, background: PIXI.Container, foreground: PIXI.Container, map: MapName): void {
     const geometry: GGeometry = (G as unknown as GData).geometry[map as MapName]
 
+    const defaultTextures = getMapTextures(map, geometry.default)
+    const backgroundTextures: PIXI.RenderTexture[] = []
+    const extraScreenWidth = (window.screen.width + window.screen.width % defaultTextures[0].width)
+    const width = (extraScreenWidth * 2) + geometry.max_x - geometry.min_x
+    const extraScreenHeight = (window.screen.height + window.screen.height % defaultTextures[0].height)
+    const height = (extraScreenHeight * 2) + geometry.max_y - geometry.min_y
+    backgroundTextures.push(PIXI.RenderTexture.create({ height: height, width: width }))
+    backgroundTextures.push(PIXI.RenderTexture.create({ height: height, width: width }))
+    backgroundTextures.push(PIXI.RenderTexture.create({ height: height, width: width }))
+
+    const fixX = -geometry.min_x + extraScreenWidth
+    const fixY = -geometry.min_y + extraScreenHeight
+
     // Draw default layer
-    let isBackgroundAnimated = false
     if (geometry.default) {
-        const textures = getMapTextures(map, geometry.default)
-        if (textures.length == 1) {
-            const texture = textures[0]
-            for (let x = geometry.min_x; x <= geometry.max_x; x += texture.width) {
-                for (let y = geometry.min_y; y <= geometry.max_y; y += texture.height) {
-                    renderTile(background, texture, x, y)
+        if (defaultTextures.length == 1) {
+            const texture = defaultTextures[0]
+            const tile = createTile(texture, 0, 0)
+            for (let i = 0; i < backgroundTextures.length; i++) {
+                for (let x = 0; x <= width; x += texture.width) {
+                    for (let y = 0; y <= height; y += texture.height) {
+                        tile.x = x
+                        tile.y = y
+                        renderer.render(tile, { clear: false, renderTexture: backgroundTextures[i] })
+                        // renderer.render(tile, { renderTexture: backgroundTextures[i] })
+                    }
                 }
             }
-            // renderTileArea(background, texture, geometry.min_x, geometry.min_y, geometry.max_x - geometry.min_x, geometry.max_y - geometry.min_y)
         } else {
-            isBackgroundAnimated = true
-            for (let x = geometry.min_x; x <= geometry.max_x; x += textures[0].width) {
-                for (let y = geometry.min_y; y <= geometry.max_y; y += textures[0].height) {
-                    renderAnimatedTile(background, textures, x, y)
+            for (let i = 0; i < backgroundTextures.length; i++) {
+                const texture = defaultTextures[i]
+                const tile = createTile(texture, 0, 0)
+                for (let x = 0; x <= width; x += texture.width) {
+                    for (let y = 0; y <= height; y += texture.height) {
+                        tile.x = x
+                        tile.y = y
+                        renderer.render(tile, { clear: false, renderTexture: backgroundTextures[i] })
+                        // renderer.render(tile, { renderTexture: backgroundTextures[i] })
+                    }
                 }
             }
         }
@@ -65,35 +77,53 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
             if (textures.length == 1) {
                 const texture = textures[0]
                 if (x2 != undefined) {
-                    for (let x = x1; x <= x2; x += texture.width) {
-                        for (let y = y1; y <= y2; y += texture.height) {
-                            renderTile(background, texture, x, y)
+                    const tile = createTile(texture, 0, 0)
+                    for (let i = 0; i < backgroundTextures.length; i++) {
+                        for (let x = x1 + fixX; x <= x2 + fixX; x += texture.width) {
+                            for (let y = y1 + fixY; y <= y2 + fixY; y += texture.height) {
+                                tile.x = x
+                                tile.y = y
+                                renderer.render(tile, { clear: false, renderTexture: backgroundTextures[i] })
+                                // renderer.render(tile, { renderTexture: backgroundTextures[i] })
+                            }
                         }
                     }
-                    // renderTileArea(background, texture, x1, y1, x2 - x1, y2 - y1)
                 } else {
-                    renderTile(background, texture, x1, y1)
+                    const tile = createTile(texture, x1 + fixX, y1 + fixY)
+                    for (let i = 0; i < backgroundTextures.length; i++) {
+                        renderer.render(tile, { clear: false, renderTexture: backgroundTextures[i] })
+                        // renderer.render(tile, { renderTexture: backgroundTextures[i] })
+                    }
                 }
             } else {
-                isBackgroundAnimated = true
                 if (x2 != undefined) {
-                    for (let x = x1; x <= x2; x += textures[0].width) {
-                        for (let y = y1; y <= y2; y += textures[0].height) {
-                            renderAnimatedTile(background, textures, x, y)
+                    for (let i = 0; i < backgroundTextures.length; i++) {
+                        const tile = createTile(textures[i], 0, 0)
+                        for (let x = x1 - geometry.min_x + fixX; x <= x2 + fixX; x += textures[i].width) {
+                            for (let y = y1 - geometry.min_y + fixY; y <= y2 + fixY; y += textures[i].height) {
+                                tile.x = x
+                                tile.y = y
+                                renderer.render(tile, { clear: false, renderTexture: backgroundTextures[i] })
+                                // renderer.render(tile, { renderTexture: backgroundTextures[i] })
+                            }
                         }
                     }
                 } else {
-                    renderAnimatedTile(background, textures, x1, y1)
+                    for (let i = 0; i < backgroundTextures.length; i++) {
+                        const tile = createTile(textures[i], x1 + fixX, y1 + fixY)
+                        renderer.render(tile, { clear: false, renderTexture: backgroundTextures[i] })
+                        // renderer.render(tile, { renderTexture: backgroundTextures[i] })
+                    }
                 }
             }
         }
     }
-    background.cacheAsBitmap = !isBackgroundAnimated
+    background.addChild(createAnimatedTile(backgroundTextures, geometry.min_x - extraScreenWidth, geometry.min_y - extraScreenHeight))
 
     // Draw groups
     if (geometry.groups) {
         for (const group of geometry.groups) {
-            const groupTile = new PIXI.Container()
+            const groupTile: PIXI.Container = new PIXI.Container()
             let minX = Number.MAX_SAFE_INTEGER
             let minY = Number.MAX_SAFE_INTEGER
             let isGroupAnimated = false
@@ -106,30 +136,28 @@ export function renderMap(background: PIXI.Container, foreground: PIXI.Container
                     if (x2 != undefined) {
                         for (let x = x1; x <= x2; x += texture.width) {
                             for (let y = y1; y <= y2; y += texture.height) {
-                                renderTile(groupTile, texture, x, y)
+                                groupTile.addChild(createTile(texture, x, y))
                             }
                         }
-                        // renderTileArea(background, texture, x1, y1, x2 - x1, y2 - y1)
                     } else {
-                        renderTile(groupTile, texture, x1, y1)
+                        groupTile.addChild(createTile(texture, x1, y1))
                     }
                 } else {
                     isGroupAnimated = true
                     if (x2 != undefined) {
                         for (let x = x1; x <= x2; x += textures[0].width) {
                             for (let y = y1; y <= y2; y += textures[0].height) {
-                                renderAnimatedTile(groupTile, textures, x, y)
+                                groupTile.addChild(createAnimatedTile(textures, x, y))
                             }
                         }
                     } else {
-                        renderAnimatedTile(groupTile, textures, x1, y1)
+                        groupTile.addChild(createAnimatedTile(textures, x1, y1))
                     }
                 }
             }
             groupTile.cacheAsBitmap = !isGroupAnimated
             groupTile.x = minX
             groupTile.y = minY
-            groupTile.zOrder = minY
             for (const child of groupTile.children) {
                 child.x -= minX
                 child.y -= minY

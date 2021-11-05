@@ -67,6 +67,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         size: G.monsters[monster.type].size,
                         skin: monster.type,
                         speed: monster.speed ?? G.monsters[monster.type].speed,
+                        target: monster.target,
                         x: monster.x,
                         y: monster.y
                     }
@@ -83,6 +84,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         moving: player.moving,
                         skin: player.skin,
                         speed: player.speed,
+                        target: player.target,
                         x: player.x,
                         y: player.y
                     }
