@@ -13,7 +13,7 @@
         "module": "ESNext",
         "moduleResolution": "node",
         "noImplicitAny": false,
-        "outDir": "docs",
+        "outDir": "build",
         "removeComments": true,
         "resolveJsonModule": true,
         "rootDir": "source",
@@ -24,7 +24,7 @@
         "source/server"
     ],
     "exclude": [
-        "docs",
+        "build",
         "node_modules",
         "source/**/*.test.*"
     ]

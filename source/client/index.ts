@@ -1,4 +1,4 @@
-import { GData, MapName, MonsterName } from "alclient"
+import { GData, MapName } from "alclient"
 import * as PIXI from "pixi.js"
 import { Cull } from "@pixi-essentials/cull"
 import { Layer, Stage } from "@pixi/layers"
@@ -63,11 +63,13 @@ PIXI.Loader.shared.add({ name: "m5x7", url: "./assets/m5x7.woff2" })
 for (const name in (G as unknown as GData).tilesets) {
     const gTileset = (G as unknown as GData).tilesets[name]
     const url = `.${gTileset.file}`
+    console.log(`loading ${url}...`)
     PIXI.Loader.shared.add({ name: url, url: url })
 }
 for (const name in (G as unknown as GData).sprites) {
     const gSprites = (G as unknown as GData).sprites[name]
     const url = `.${gSprites.file}`
+    console.log(`loading ${url}...`)
     PIXI.Loader.shared.add({ name: url, url: url })
 }
 
@@ -94,6 +96,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     foreground.group.enableSort = true
     viewport.addChild(foreground)
 
+    let activeTab: string
     const socket = SocketIO.io({
         autoConnect: true,
         reconnection: true,
@@ -102,6 +105,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     socket.on("message", (message) => console.log(`We got ${message} back`))
     socket.on("newTab", (tabName: string) => {
         socket.emit("switchTab", tabName)
+        activeTab = tabName
     })
 
     socket.on("clear", () => {
@@ -172,7 +176,10 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         renderMonster(foreground, data)
     })
     socket.on("character", (data: CharacterData) => {
-        renderCharacter(foreground, data)
+        const sprite = renderCharacter(foreground, data)
+        if (activeTab == data.id) {
+            viewport.follow(sprite)
+        }
     })
     socket.on("remove", (id: string) => {
         removeSprite(id)

@@ -1,11 +1,16 @@
 {
   "name": "algui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "GUI Tests for the MMORPG Adventure.Land",
-  "main": "index.js",
+  "main": "build/server/index.js",
+  "files": [
+    "build/**/*",
+    "package.json",
+    "README.md"
+  ],
   "type": "module",
   "scripts": {
-    "build": "webpack && tsc",
+    "build": "webpack && tsc && copyfiles --up 1 source/definitions/*.d.ts build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -26,6 +31,7 @@
     "@typescript-eslint/parser": "^5.2.0",
     "alclient": "^0.8.27",
     "copy-webpack-plugin": "^9.0.1",
+    "copyfiles": "^2.4.1",
     "css-loader": "^6.5.0",
     "eslint": "^8.1.0",
     "file-loader": "^6.2.0",
