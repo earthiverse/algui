@@ -178,7 +178,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     socket.on("character", (data: CharacterData) => {
         const sprite = renderCharacter(foreground, data)
         if (activeTab == data.id) {
-            viewport.follow(sprite)
+            viewport.follow(sprite, { acceleration: data.speed / 30, radius: 10 })
         }
     })
     socket.on("remove", (id: string) => {
