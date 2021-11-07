@@ -90,7 +90,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         max_hp: monster.max_hp ?? G.monsters[monster.type].hp,
                         moving: monster.moving,
                         size: G.monsters[monster.type].size,
-                        skin: monster.type,
+                        skin: G.monsters[monster.type].skin,
                         speed: monster.speed ?? G.monsters[monster.type].speed,
                         target: monster.target,
                         x: monster.x,
@@ -145,7 +145,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         max_hp: monster.max_hp ?? G.monsters[monster.type].hp,
                         moving: monster.moving,
                         size: G.monsters[monster.type].size,
-                        skin: monster.type,
+                        skin: G.monsters[monster.type].skin,
                         speed: monster.speed ?? G.monsters[monster.type].speed,
                         target: monster.target,
                         x: monster.x,
@@ -214,16 +214,17 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
             }
 
             // Sockets to ignore
-            case "eval":
-            case "game_event":
-            case "server_info":
-                break
-            // default: {
+            // case "eval":
+            // case "game_event":
+            // case "ping_ack":
+            // case "server_info":
+            //     break
+            default: {
             //     console.log(`------------------------------ ${eventName} ------------------------------`)
             //     console.log(JSON.stringify(args, undefined, 2))
             //     console.log("--------------------------------------------------------------------------------")
-            //     break
-            // }
+                break
+            }
         }
     })
 
