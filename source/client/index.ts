@@ -1,4 +1,4 @@
-import { GData, MapName } from "alclient"
+import { GData, GGeometry, MapName } from "alclient"
 import * as PIXI from "pixi.js"
 import { Cull } from "@pixi-essentials/cull"
 import { Layer, Stage } from "@pixi/layers"
@@ -169,6 +169,13 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         }
         cull.addAll(background.children)
         cull.addAll(foreground.children)
+        const geometry: GGeometry = (G as GData).geometry[data.map]
+        viewport.clamp({
+            left: geometry.min_x,
+            right: geometry.max_x,
+            top: geometry.min_y,
+            bottom: geometry.max_y
+        })
         viewport.moveCenter(data.x, data.y)
         viewport.dirty = true
     })

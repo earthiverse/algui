@@ -28,16 +28,14 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, backg
 
     const defaultTextures = getMapTextures(map, geometry.default)
     const backgroundTextures: PIXI.RenderTexture[] = []
-    const extraScreenWidth = (window.screen.width + window.screen.width % defaultTextures[0].width)
-    const width = (extraScreenWidth * 2) + geometry.max_x - geometry.min_x
-    const extraScreenHeight = (window.screen.height + window.screen.height % defaultTextures[0].height)
-    const height = (extraScreenHeight * 2) + geometry.max_y - geometry.min_y
+    const width = geometry.max_x - geometry.min_x
+    const height = geometry.max_y - geometry.min_y
     backgroundTextures.push(PIXI.RenderTexture.create({ height: height, width: width }))
     backgroundTextures.push(PIXI.RenderTexture.create({ height: height, width: width }))
     backgroundTextures.push(PIXI.RenderTexture.create({ height: height, width: width }))
 
-    const fixX = -geometry.min_x + extraScreenWidth
-    const fixY = -geometry.min_y + extraScreenHeight
+    const fixX = -geometry.min_x
+    const fixY = -geometry.min_y
 
     // Draw default layer
     if (geometry.default) {
@@ -118,7 +116,7 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, backg
             }
         }
     }
-    background.addChild(createAnimatedTile(backgroundTextures, geometry.min_x - extraScreenWidth, geometry.min_y - extraScreenHeight))
+    background.addChild(createAnimatedTile(backgroundTextures, geometry.min_x, geometry.min_y))
 
     // Draw groups
     if (geometry.groups) {
@@ -156,11 +154,11 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, backg
                 }
             }
             groupTile.cacheAsBitmap = !isGroupAnimated
-            groupTile.x = minX
-            groupTile.y = minY
+            groupTile.x = minX + fixX
+            groupTile.y = minY + fixY
             for (const child of groupTile.children) {
-                child.x -= minX
-                child.y -= minY
+                child.x -= minX + fixX
+                child.y -= minY + fixY
             }
             foreground.addChild(groupTile)
         }

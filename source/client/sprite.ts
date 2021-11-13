@@ -7,6 +7,7 @@ import { CharacterData, MonsterData } from "../definitions/client"
 export type MonsterSpriteData = {
     data: MonsterData
     lastDirection: number
+    focusedHover?: boolean
     sprite: PIXI.AnimatedSprite
     textures: PIXI.Texture[][]
 }
@@ -14,6 +15,7 @@ export type MonsterSpriteData = {
 export type CharacterSpriteData = {
     data: CharacterData
     lastDirection: number
+    focusedHover?: boolean
     sprite: PIXI.AnimatedSprite
     textures: PIXI.Texture[][]
     texturesChildren: {
@@ -21,6 +23,7 @@ export type CharacterSpriteData = {
     }
 }
 
+let focused: string
 const monsters = new Map<string, MonsterSpriteData>()
 const characters = new Map<string, CharacterSpriteData>()
 function animate() {
@@ -63,7 +66,7 @@ function animate() {
 
         // Change sprite texture based on direction
         let direction = datum.lastDirection
-        if (datum.data.target) {
+        if (datum.data.target && (characters.has(datum.data.target) || monsters.has(datum.data.target))) {
             const target = characters.get(datum.data.target) || monsters.get(datum.data.target)
             if (target) {
                 const targetAngle = Math.atan2(target.data.y - datum.data.y, target.data.x - datum.data.x)
@@ -74,8 +77,6 @@ function animate() {
         }
         if (datum.lastDirection !== direction) {
             datum.sprite.textures = datum.textures[direction]
-            // Play a random frame
-            datum.sprite.gotoAndPlay(Math.floor(Math.random() * (datum.sprite.totalFrames + 1)))
             datum.lastDirection = direction
         }
 
@@ -89,6 +90,7 @@ function animate() {
 
         // Update HP Bar
         const hpBar = datum.sprite.children[0] as PIXI.Graphics
+        hpBar.visible = (focused == datum.data.id) || (datum.focusedHover ?? false)
         if (hpBar.visible) {
             hpBar.clear()
             hpBar.beginFill(0x000000).lineStyle(0).drawRect(0, -4, datum.sprite.width, 4)
@@ -123,7 +125,7 @@ function animate() {
         datum.sprite.y = datum.data.y - datum.sprite.height
 
         let direction = datum.lastDirection
-        if (datum.data.target) {
+        if (datum.data.target && (characters.has(datum.data.target) || monsters.has(datum.data.target))) {
             // Change sprite texture based on target
             const target = monsters.get(datum.data.target) || characters.get(datum.data.target)
             if (target) {
@@ -135,14 +137,11 @@ function animate() {
             direction = radsToDirection(angle)
         }
         if (datum.lastDirection !== direction) {
-            const randomFrame = Math.floor(Math.random() * (datum.sprite.totalFrames + 1))
             datum.sprite.textures = datum.textures[direction]
-            datum.sprite.gotoAndStop(randomFrame)
 
             for (let i = 1; i < datum.sprite.children.length; i++) {
                 const child = datum.sprite.children[i] as PIXI.AnimatedSprite
                 child.textures = datum.texturesChildren[i][direction]
-                child.gotoAndStop(Math.min(child.totalFrames, randomFrame))
             }
 
             datum.lastDirection = direction
@@ -154,7 +153,7 @@ function animate() {
             datum.sprite.gotoAndStop(1)
             for (let i = 1; i < datum.sprite.children.length; i++) {
                 const child = datum.sprite.children[i] as PIXI.AnimatedSprite
-                child.gotoAndStop(Math.min(child.totalFrames, 1))
+                child.gotoAndStop(child.totalFrames > 1 ? 1 : 0)
             }
         } else if (datum.data.moving && !datum.sprite.playing) {
             datum.sprite.play()
@@ -166,6 +165,7 @@ function animate() {
 
         // Update HP Bar
         const hpBar = datum.sprite.children[0] as PIXI.Graphics
+        hpBar.visible = (focused == datum.data.id) || (datum.focusedHover ?? false)
         if (hpBar.visible) {
             hpBar.clear()
             hpBar.beginFill(0x000000).lineStyle(0).drawRect(0, -4, datum.sprite.width, 4)
@@ -235,7 +235,7 @@ export function renderCharacter(container: PIXI.Container, character: CharacterD
 
         sprite.interactive = true
         sprite.interactiveChildren = false
-        const datum = {
+        const datum: CharacterSpriteData = {
             data: character,
             lastDirection: initialDirection,
             sprite: sprite,
@@ -245,20 +245,29 @@ export function renderCharacter(container: PIXI.Container, character: CharacterD
         characters.set(character.id, datum)
 
         // Start on a random frame
-        const randomFrame = Math.floor(Math.random() * (sprite.totalFrames + 1))
-        sprite.gotoAndPlay(randomFrame)
-        for (let i = 1; i < sprite.children.length; i++) {
-            const child = sprite.children[i] as PIXI.AnimatedSprite
-            child.gotoAndPlay(Math.min(child.totalFrames, randomFrame))
+        if (character.moving) {
+            const randomFrame = Math.floor(Math.random() * (sprite.totalFrames + 1))
+            sprite.gotoAndPlay(randomFrame)
+            for (let i = 1; i < sprite.children.length; i++) {
+                const child = sprite.children[i] as PIXI.AnimatedSprite
+                child.gotoAndPlay(child.totalFrames > 1 ? randomFrame : 0)
+            }
+        } else {
+            sprite.gotoAndStop(1)
+            for (let i = 1; i < sprite.children.length; i++) {
+                const child = sprite.children[i] as PIXI.AnimatedSprite
+                child.gotoAndStop(child.totalFrames > 1 ? 1 : 0)
+            }
         }
-        sprite.animationSpeed = 1 / 10
+        sprite.animationSpeed = character.speed / 100000
 
         // Add hp bar (will be updated in animate loop)
         const hpBar = new PIXI.Graphics()
         hpBar.visible = false
         sprite.addChild(hpBar)
-        sprite.on("mouseover", () => { sprite.children[0].visible = true })
-        sprite.on("mouseout", () => { sprite.children[0].visible = false })
+        sprite.on("click", () => { focused = character.id })
+        sprite.on("mouseover", () => { datum.focusedHover = true })
+        sprite.on("mouseout", () => { datum.focusedHover = false })
 
         // Add base skin
         if (type !== "full") {
@@ -344,23 +353,29 @@ export function renderMonster(container: PIXI.Container, monster: MonsterData, i
         container.addChild(sprite)
         sprite.interactive = true
         sprite.interactiveChildren = false
-        monsters.set(monster.id, {
-            lastDirection: initialDirection,
+        const datum: MonsterSpriteData = {
             data: monster,
+            lastDirection: initialDirection,
             sprite: sprite,
             textures: textures
-        })
+        }
+        monsters.set(monster.id, datum)
 
         // Start on a random frame
-        sprite.gotoAndPlay(Math.floor(Math.random() * (sprite.totalFrames + 1)))
-        sprite.animationSpeed = 1 / 10
+        if (monster.moving){
+            sprite.gotoAndPlay(Math.floor(Math.random() * (sprite.totalFrames + 1)))
+        } else {
+            sprite.gotoAndStop(1)
+        }
+        sprite.animationSpeed = monster.speed / 10000
 
         // Add hp bar (will be updated in animate loop)
         const hpBar = new PIXI.Graphics()
         hpBar.visible = false
         sprite.addChild(hpBar)
-        sprite.on("mouseover", () => { sprite.children[0].visible = true })
-        sprite.on("mouseout", () => { sprite.children[0].visible = false })
+        sprite.on("click", () => { focused = monster.id })
+        sprite.on("mouseover", () => { datum.focusedHover = true })
+        sprite.on("mouseout", () => { datum.focusedHover = false })
     }
 
     // Update position
