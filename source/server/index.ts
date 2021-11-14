@@ -237,11 +237,11 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
     characterSocket.emit("send_updates", {})
 }
 
-async function run() {
-    await AL.Game.loginJSONFile("../../credentials.json")
-    const G = await AL.Game.getGData(true, false)
-    startServer(8080, G)
-    const observer = await AL.Game.startObserver("US", "III")
-    addSocket("US III", observer.socket, observer)
-}
-run()
+// async function run() {
+//     await AL.Game.loginJSONFile("../../credentials.json")
+//     const G = await AL.Game.getGData(true, false)
+//     startServer(8080, G)
+//     const observer = await AL.Game.startObserver("US", "III")
+//     addSocket("US III", observer.socket, observer)
+// }
+// run()
