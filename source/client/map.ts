@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js"
 import { GData, GGeometry, MapName } from "alclient"
 import { getMapTextures } from "./texture"
 import G from "../G.json"
+import { Layers } from "../definitions/client"
 
 function createTile(texture: PIXI.Texture, x: number, y: number) {
     const tile = new PIXI.Sprite(texture)
@@ -23,7 +24,7 @@ function createAnimatedTile(textures: PIXI.Texture[], x: number, y: number) {
     return tile
 }
 
-export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, background: PIXI.Container, foreground: PIXI.Container, map: MapName): void {
+export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, layers: Layers, map: MapName): void {
     const geometry: GGeometry = (G as unknown as GData).geometry[map as MapName]
 
     const defaultTextures = getMapTextures(map, geometry.default)
@@ -36,6 +37,9 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, backg
 
     const fixX = -geometry.min_x
     const fixY = -geometry.min_y
+
+    layers.hpBars.x = fixX
+    layers.hpBars.y = fixY
 
     // Draw default layer
     if (geometry.default) {
@@ -74,7 +78,7 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, backg
             const textures = getMapTextures(map, index)
             if (textures.length == 1) {
                 const texture = textures[0]
-                if (x2 != undefined) {
+                if (x2 !== undefined) {
                     const tile = createTile(texture, 0, 0)
                     for (let i = 0; i < backgroundTextures.length; i++) {
                         for (let x = x1 + fixX; x <= x2 + fixX; x += texture.width) {
@@ -94,11 +98,11 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, backg
                     }
                 }
             } else {
-                if (x2 != undefined) {
+                if (x2 !== undefined) {
                     for (let i = 0; i < backgroundTextures.length; i++) {
                         const tile = createTile(textures[i], 0, 0)
-                        for (let x = x1 - geometry.min_x + fixX; x <= x2 + fixX; x += textures[i].width) {
-                            for (let y = y1 - geometry.min_y + fixY; y <= y2 + fixY; y += textures[i].height) {
+                        for (let x = x1 + fixX; x <= x2 + fixX; x += textures[i].width) {
+                            for (let y = y1 + fixY; y <= y2 + fixY; y += textures[i].height) {
                                 tile.x = x
                                 tile.y = y
                                 renderer.render(tile, { clear: false, renderTexture: backgroundTextures[i] })
@@ -116,7 +120,7 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, backg
             }
         }
     }
-    background.addChild(createAnimatedTile(backgroundTextures, geometry.min_x, geometry.min_y))
+    layers.background.addChild(createAnimatedTile(backgroundTextures, geometry.min_x, geometry.min_y))
 
     // Draw groups
     if (geometry.groups) {
@@ -131,7 +135,7 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, backg
                 const textures = getMapTextures(map, index)
                 if (textures.length == 1) {
                     const texture = textures[0]
-                    if (x2 != undefined) {
+                    if (x2 !== undefined) {
                         for (let x = x1; x <= x2; x += texture.width) {
                             for (let y = y1; y <= y2; y += texture.height) {
                                 groupTile.addChild(createTile(texture, x, y))
@@ -142,7 +146,7 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, backg
                     }
                 } else {
                     isGroupAnimated = true
-                    if (x2 != undefined) {
+                    if (x2 !== undefined) {
                         for (let x = x1; x <= x2; x += textures[0].width) {
                             for (let y = y1; y <= y2; y += textures[0].height) {
                                 groupTile.addChild(createAnimatedTile(textures, x, y))
@@ -156,11 +160,12 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, backg
             groupTile.cacheAsBitmap = !isGroupAnimated
             groupTile.x = minX + fixX
             groupTile.y = minY + fixY
+            groupTile.zIndex = groupTile.y
             for (const child of groupTile.children) {
                 child.x -= minX + fixX
                 child.y -= minY + fixY
             }
-            foreground.addChild(groupTile)
+            layers.foreground.addChild(groupTile)
         }
     }
 }

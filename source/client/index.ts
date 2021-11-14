@@ -9,7 +9,7 @@ import "./index.css"
 import { renderMap } from "./map"
 import { removeAllSprites, removeSprite, renderCharacter, renderMonster } from "./sprite"
 import { MapData } from "../definitions/server"
-import { CharacterData, MonsterData } from "../definitions/client"
+import { CharacterData, Layers, MonsterData } from "../definitions/client"
 import G from "../G.json"
 
 // Setup web font loader
@@ -77,7 +77,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     // Show x/y coordinates
     const text = new PIXI.Text("x: 0.00, y: 0.00", { fill: "white", fontFamily: "m5x7", fontSize: 28, lineHeight: 28, lineJoin: "round", strokeThickness: 5 })
     text.anchor.set(0, 0)
-    text.zIndex = 2
+    text.zIndex = 3
     app.stage.addChild(text)
     PIXI.Ticker.shared.add(() => {
         const mouse = app.renderer.plugins.interaction.mouse.getLocalPosition(viewport)
@@ -86,15 +86,15 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         text.text = `x: ${mouse.x.toFixed(2)}, y: ${mouse.y.toFixed(2)}`
     })
 
-    let background: PIXI.Container = new PIXI.Container()
-    background.interactive = false
-    background.interactiveChildren = false
-    background.zIndex = -1
-    viewport.addChild(background)
-    let foreground: Layer = new Layer()
-    foreground.zIndex = 0
-    foreground.group.enableSort = true
-    viewport.addChild(foreground)
+    const hpBars = new PIXI.Container()
+    hpBars.zIndex = 2
+
+    const layers: Layers = {
+        background: undefined,
+        foreground: undefined,
+        hpBars: hpBars,
+        viewport: viewport
+    }
 
     let activeTab: string
     const socket = SocketIO.io({
@@ -115,61 +115,48 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     let lastMap: MapName = undefined
     const mapCache = new Map<MapName, {
         background: PIXI.Container
-        foreground: Layer
+        foreground: PIXI.Container
     }>()
     socket.on("map", (data: MapData) => {
         console.log(`Switching map to ${data.map},${data.x},${data.y}`)
         cull.clear()
         removeAllSprites()
         if (lastMap !== data.map) {
-        // Check the cache
-            foreground.group.removeAllListeners()
+            // Check the cache
             const cache = mapCache.get(data.map)
             if (cache) {
-                background.visible = false
-                foreground.visible = false
-                foreground.group.enableSort = false
-                viewport.removeChild(background)
-                viewport.removeChild(foreground)
-                background = cache.background
-                background.visible = true
-                foreground = cache.foreground
-                foreground.visible = true
-                foreground.group.enableSort = true
-                foreground.on("sort", (sprite) => {
-                    sprite.zOrder = sprite.y
-                })
-                viewport.addChild(background)
-                viewport.addChild(foreground)
+                viewport.removeChild(layers.background)
+                viewport.removeChild(layers.foreground)
+                layers.background = cache.background
+                layers.foreground = cache.foreground
+                console.log(`cached foreground sort: ${layers.foreground.sortableChildren}`)
+                viewport.addChild(layers.background)
+                viewport.addChild(layers.foreground)
             } else {
-                if (lastMap == undefined) {
-                    background.destroy()
-                    foreground.destroy()
-                }
-                background = new PIXI.Container()
-                background.interactive = false
-                background.interactiveChildren = false
-                background.zIndex = -1
-                foreground = new Layer()
-                foreground.zIndex = 0
-                foreground.group.enableSort = true
-                foreground.on("sort", (sprite) => {
-                    sprite.zOrder = sprite.y
-                })
-                renderMap(app.renderer, background, foreground, data.map)
+                layers.background = new PIXI.Container()
+                layers.background.interactive = false
+                layers.background.interactiveChildren = false
+                layers.background.zIndex = 0
+
+                layers.foreground = new PIXI.Container()
+                layers.foreground.zIndex = 1
+                layers.foreground.interactiveChildren = true
+                layers.foreground.sortableChildren = true
+
+                renderMap(app.renderer, layers, data.map)
                 mapCache.set(data.map, {
-                    background: background,
-                    foreground: foreground
+                    background: layers.background,
+                    foreground: layers.foreground
                 })
-                viewport.addChild(background)
-                viewport.addChild(foreground)
+                viewport.addChild(layers.background)
+                viewport.addChild(layers.foreground)
             }
 
             lastMap = data.map
         }
-        cull.addAll(background.children)
-        cull.addAll(foreground.children)
-        const geometry: GGeometry = (G as GData).geometry[data.map]
+        cull.addAll(layers.background.children)
+        cull.addAll(layers.foreground.children)
+        const geometry: GGeometry = (G as unknown as GData).geometry[data.map]
         viewport.clamp({
             left: geometry.min_x,
             right: geometry.max_x,
@@ -180,10 +167,10 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         viewport.dirty = true
     })
     socket.on("monster", (data: MonsterData) => {
-        renderMonster(foreground, data)
+        renderMonster(layers, data)
     })
     socket.on("character", (data: CharacterData) => {
-        const sprite = renderCharacter(foreground, data)
+        const sprite = renderCharacter(layers, data)
         if (activeTab == data.id) {
             viewport.follow(sprite, { acceleration: data.speed / 30, radius: 10 })
         }

@@ -5,6 +5,9 @@
             "ESNext",
             "DOM"
         ],
+        "types": [
+            "offscreencanvas"
+        ],
         "allowSyntheticDefaultImports": true,
         "alwaysStrict": true,
         "declaration": true,

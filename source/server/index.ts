@@ -1,5 +1,5 @@
 
-import { ActionData, ChestData, ChestOpenedData, DeathData, DisappearingTextData, EntitiesData, GameLogData, GData, HitData, NewMapData, PlayerData, WelcomeData } from "alclient"
+import AL, { ActionData, ChestData, ChestOpenedData, DeathData, DisappearingTextData, EntitiesData, GameLogData, GData, HitData, NewMapData, PlayerData, WelcomeData } from "alclient"
 import Express from "express"
 import Http from "http"
 import { fileURLToPath } from "url"
@@ -89,6 +89,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         id: monster.id,
                         max_hp: monster.max_hp ?? G.monsters[monster.type].hp,
                         moving: monster.moving,
+                        s: monster.s,
                         size: G.monsters[monster.type].size,
                         skin: G.monsters[monster.type].skin,
                         speed: monster.speed ?? G.monsters[monster.type].speed,
@@ -107,6 +108,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         id: player.id,
                         max_hp: player.max_hp,
                         moving: player.moving,
+                        s: player.s,
                         skin: player.skin,
                         speed: player.speed,
                         target: player.target,
@@ -144,6 +146,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         id: monster.id,
                         max_hp: monster.max_hp ?? G.monsters[monster.type].hp,
                         moving: monster.moving,
+                        s: monster.s,
                         size: G.monsters[monster.type].size,
                         skin: G.monsters[monster.type].skin,
                         speed: monster.speed ?? G.monsters[monster.type].speed,
@@ -162,6 +165,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         id: player.id,
                         max_hp: player.max_hp,
                         moving: player.moving,
+                        s: player.s,
                         skin: player.skin,
                         speed: player.speed,
                         target: player.target,
@@ -191,6 +195,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                     id: data.id,
                     max_hp: data.max_hp,
                     moving: data.moving,
+                    s: data.s,
                     skin: data.skin,
                     speed: data.speed,
                     target: data.target,
@@ -231,3 +236,12 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
     // Send a request to get all the entities so that everything renders correctly on the GUI
     characterSocket.emit("send_updates", {})
 }
+
+async function run() {
+    await AL.Game.loginJSONFile("../../credentials.json")
+    const G = await AL.Game.getGData(true, false)
+    startServer(8080, G)
+    const observer = await AL.Game.startObserver("US", "III")
+    addSocket("US III", observer.socket, observer)
+}
+run()
