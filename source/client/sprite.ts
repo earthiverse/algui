@@ -428,7 +428,7 @@ export function renderMonster(layers: Layers, monster: MonsterData, initialDirec
         } else {
             sprite.gotoAndStop(1)
         }
-        sprite.animationSpeed = monster.speed / 10000
+        sprite.animationSpeed = monster.speed / 1000
     }
 
     // Update position

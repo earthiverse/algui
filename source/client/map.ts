@@ -75,7 +75,7 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, layer
             const textures = getMapTextures(map, index)
             if (textures.length == 1) {
                 const texture = textures[0]
-                if (x2 !== undefined) {
+                if (x2 != undefined) {
                     const tile = createTile(texture, 0, 0)
                     for (let i = 0; i < backgroundTextures.length; i++) {
                         for (let x = x1 + fixX; x <= x2 + fixX; x += texture.width) {
@@ -95,7 +95,7 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, layer
                     }
                 }
             } else {
-                if (x2 !== undefined) {
+                if (x2 != undefined) {
                     for (let i = 0; i < backgroundTextures.length; i++) {
                         const tile = createTile(textures[i], 0, 0)
                         for (let x = x1 + fixX; x <= x2 + fixX; x += textures[i].width) {
@@ -132,7 +132,7 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, layer
                 const textures = getMapTextures(map, index)
                 if (textures.length == 1) {
                     const texture = textures[0]
-                    if (x2 !== undefined) {
+                    if (x2 != undefined) {
                         for (let x = x1; x <= x2; x += texture.width) {
                             for (let y = y1; y <= y2; y += texture.height) {
                                 groupTile.addChild(createTile(texture, x, y))
@@ -143,7 +143,7 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, layer
                     }
                 } else {
                     isGroupAnimated = true
-                    if (x2 !== undefined) {
+                    if (x2 != undefined) {
                         for (let x = x1; x <= x2; x += textures[0].width) {
                             for (let y = y1; y <= y2; y += textures[0].height) {
                                 groupTile.addChild(createAnimatedTile(textures, x, y))
