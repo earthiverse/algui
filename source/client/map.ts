@@ -38,9 +38,6 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, layer
     const fixX = -geometry.min_x
     const fixY = -geometry.min_y
 
-    layers.hpBars.x = fixX
-    layers.hpBars.y = fixY
-
     // Draw default layer
     if (geometry.default) {
         if (defaultTextures.length == 1) {
@@ -158,12 +155,12 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, layer
                 }
             }
             groupTile.cacheAsBitmap = !isGroupAnimated
-            groupTile.x = minX + fixX
-            groupTile.y = minY + fixY
+            groupTile.x = minX
+            groupTile.y = minY
             groupTile.zIndex = groupTile.y
             for (const child of groupTile.children) {
-                child.x -= minX + fixX
-                child.y -= minY + fixY
+                child.x -= minX
+                child.y -= minY
             }
             layers.foreground.addChild(groupTile)
         }

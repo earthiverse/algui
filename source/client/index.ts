@@ -31,6 +31,9 @@ const viewport = new Viewport({
     screenHeight: window.innerHeight,
     screenWidth: window.innerWidth
 })
+viewport.interactive = true
+viewport.interactiveChildren = true
+viewport.sortableChildren = true
 viewport.setZoom(2, true)
 viewport.pinch().drag().decelerate()
 app.stage.addChild(viewport)
@@ -75,7 +78,8 @@ for (const name in (G as unknown as GData).sprites) {
 
 PIXI.Loader.shared.load().onComplete.add(() => {
     // Show x/y coordinates
-    const text = new PIXI.Text("x: 0.00, y: 0.00", { fill: "white", fontFamily: "m5x7", fontSize: 28, lineHeight: 28, lineJoin: "round", strokeThickness: 5 })
+    let currentMap = undefined
+    const text = new PIXI.Text("map: undefined, x: 0.00, y: 0.00", { fill: "white", fontFamily: "m5x7", fontSize: 28, lineHeight: 28, lineJoin: "round", strokeThickness: 5 })
     text.anchor.set(0, 0)
     text.zIndex = 3
     app.stage.addChild(text)
@@ -83,11 +87,12 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         const mouse = app.renderer.plugins.interaction.mouse.getLocalPosition(viewport)
         text.x = window.innerWidth - text.width
         text.y = window.innerHeight - text.height
-        text.text = `x: ${mouse.x.toFixed(2)}, y: ${mouse.y.toFixed(2)}`
+        text.text = `map: ${currentMap}, x: ${mouse.x.toFixed(2)}, y: ${mouse.y.toFixed(2)}`
     })
 
     const hpBars = new PIXI.Container()
     hpBars.zIndex = 2
+    viewport.addChild(hpBars)
 
     const layers: Layers = {
         background: undefined,
@@ -118,6 +123,8 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         foreground: PIXI.Container
     }>()
     socket.on("map", (data: MapData) => {
+        currentMap = data.map
+        text.text = `map: ${data.map}, x: ${data.x.toFixed(2)}, y: ${data.y.toFixed(2)}`
         console.log(`Switching map to ${data.map},${data.x},${data.y}`)
         cull.clear()
         removeAllSprites()
@@ -140,6 +147,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
 
                 layers.foreground = new PIXI.Container()
                 layers.foreground.zIndex = 1
+                layers.foreground.interactive = true
                 layers.foreground.interactiveChildren = true
                 layers.foreground.sortableChildren = true
 
