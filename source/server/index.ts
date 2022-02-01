@@ -242,7 +242,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
 //     await AL.Game.loginJSONFile("../../credentials.json")
 //     const G = await AL.Game.getGData(true, false)
 //     startServer(8080, G)
-//     const observer = await AL.Game.startObserver("US", "III")
-//     addSocket("US III", observer.socket, observer)
+//     const observer = await AL.Game.startObserver("US", "I")
+//     addSocket("US I", observer.socket, observer)
 // }
 // run()
