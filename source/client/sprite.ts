@@ -86,7 +86,11 @@ function animate() {
         if (!datum.data.moving && !datum.data.aa && datum.sprite.playing) {
             // The middle sprite is the one in the "stopped" position
             datum.sprite.gotoAndStop(1)
-        } else if (datum.data.moving && !datum.sprite.playing) {
+        } else if ((datum.data.aa || datum.data.moving) && !datum.sprite.playing) {
+            // Set animation speed
+            datum.sprite.animationSpeed = datum.data.speed / 1000
+
+            // Start animation
             datum.sprite.play()
         }
 
@@ -117,7 +121,7 @@ function animate() {
         }
     }
 
-    for (const [id, datum] of characters) {
+    for (const [, datum] of characters) {
         // Movement Computation
         const angle = Math.atan2(datum.data.going_y - datum.data.y, datum.data.going_x - datum.data.x)
         if (datum.data.moving) {
@@ -167,6 +171,15 @@ function animate() {
                 child.gotoAndStop(child.totalFrames > 1 ? 1 : 0)
             }
         } else if (datum.data.moving && !datum.sprite.playing) {
+            // Set animation speed
+            const speed = datum.data.speed / 1000
+            datum.sprite.animationSpeed = speed
+            for (let i = datum.sprite.children.length - 1; i >= 0 ; i--) {
+                const child = datum.sprite.children[i] as PIXI.AnimatedSprite
+                child.animationSpeed = speed
+            }
+
+            // Start animation
             datum.sprite.play()
             for (let i = datum.sprite.children.length - 1; i >= 0 ; i--) {
                 const child = datum.sprite.children[i] as PIXI.AnimatedSprite
@@ -216,7 +229,7 @@ export function removeSprite(id: string) {
         return
     }
 
-    // Setting the HP to 1 will slowly fade away the monster
+    // Setting the HP to -1 will slowly fade away the monster
     const monster = monsters.get(id)
     if (monster) monster.data.hp = -1
 }
@@ -279,23 +292,6 @@ export function renderCharacter(layers: Layers, character: CharacterData, initia
             texturesChildren: {}
         }
         characters.set(character.id, datum)
-
-        // Start on a random frame
-        if (character.moving) {
-            const randomFrame = Math.floor(Math.random() * (sprite.totalFrames + 1))
-            sprite.gotoAndPlay(randomFrame)
-            for (let i = datum.sprite.children.length - 1; i >= 0 ; i--) {
-                const child = sprite.children[i] as PIXI.AnimatedSprite
-                child.gotoAndPlay(child.totalFrames > 1 ? randomFrame : 0)
-            }
-        } else {
-            sprite.gotoAndStop(1)
-            for (let i = datum.sprite.children.length - 1; i >= 0 ; i--) {
-                const child = sprite.children[i] as PIXI.AnimatedSprite
-                child.gotoAndStop(child.totalFrames > 1 ? 1 : 0)
-            }
-        }
-        sprite.animationSpeed = character.speed / 100000
 
         // Add base skin
         if (type !== "full") {
@@ -379,7 +375,32 @@ export function renderCharacter(layers: Layers, character: CharacterData, initia
                 datum.texturesChildren[sprite.children.length - 1] = coversTextures
             }
         }
-        layers.foreground.addChild(sprite)
+        layers.foreground?.addChild(sprite)
+
+        if (character.moving) {
+            // Set animation speed
+            const speed = character.speed / 1000
+            sprite.animationSpeed = speed
+            for (let i = datum.sprite.children.length - 1; i >= 0 ; i--) {
+                const child = sprite.children[i] as PIXI.AnimatedSprite
+                child.animationSpeed = speed
+            }
+
+            // Start on a random frame
+            const randomFrame = Math.floor(Math.random() * (sprite.totalFrames + 1))
+            sprite.gotoAndPlay(randomFrame)
+            for (let i = datum.sprite.children.length - 1; i >= 0 ; i--) {
+                const child = sprite.children[i] as PIXI.AnimatedSprite
+                child.gotoAndPlay(child.totalFrames > 1 ? randomFrame : 0)
+            }
+        } else {
+            sprite.gotoAndStop(1)
+            for (let i = datum.sprite.children.length - 1; i >= 0 ; i--) {
+                const child = sprite.children[i] as PIXI.AnimatedSprite
+                child.gotoAndStop(child.totalFrames > 1 ? 1 : 0)
+            }
+        }
+
     }
 
     // Update position
@@ -400,7 +421,7 @@ export function renderMonster(layers: Layers, monster: MonsterData, initialDirec
     } else {
         const textures = getSkinTextures(monster.skin)
         sprite = new PIXI.AnimatedSprite(textures[initialDirection])
-        layers.foreground.addChild(sprite)
+        layers.foreground?.addChild(sprite)
         sprite.interactive = true
         sprite.interactiveChildren = false
 
@@ -422,13 +443,16 @@ export function renderMonster(layers: Layers, monster: MonsterData, initialDirec
         }
         monsters.set(monster.id, datum)
 
-        // Start on a random frame
-        if (monster.moving){
+        if (monster.moving) {
+            // Set animation speed
+            sprite.animationSpeed = monster.speed / 1000
+
+            // Start on a random frame
             sprite.gotoAndPlay(Math.floor(Math.random() * (sprite.totalFrames + 1)))
         } else {
             sprite.gotoAndStop(1)
         }
-        sprite.animationSpeed = monster.speed / 1000
+
     }
 
     // Update position

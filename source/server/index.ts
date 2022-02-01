@@ -60,17 +60,17 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
             }
             case "chest_opened": {
                 const data = args as ChestOpenedData
-                // TODO: Animate chest
+                // TODO: Animate chest && remove
                 break
             }
             case "death": {
                 const data = args as DeathData
-                io.to(tabName).emit("remove", data.id)
+                // TODO: Render gravestone
                 break
             }
             case "disappearing_text": {
                 const data = args as DisappearingTextData
-                // TODO: Animate text
+                // TODO: Animate text?
                 break
             }
             case "drop": {
@@ -83,6 +83,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 if (data.type == "all") io.to(tabName).emit("clear")
                 for (const monster of data.monsters) {
                     const monsterData: MonsterData = {
+                        aa: G.monsters[monster.type].aa,
                         going_x: monster.going_x,
                         going_y: monster.going_y,
                         hp: monster.hp ?? G.monsters[monster.type].hp,
