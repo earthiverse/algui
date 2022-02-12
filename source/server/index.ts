@@ -65,7 +65,8 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
             }
             case "death": {
                 const data = args as DeathData
-                // TODO: Render gravestone
+                // TODO: Render gravestone for players
+                io.to(tabName).emit("remove", data.id)
                 break
             }
             case "disappearing_text": {
@@ -238,11 +239,11 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
     characterSocket.emit("send_updates", {})
 }
 
-// async function run() {
-//     await AL.Game.loginJSONFile("../../credentials.json")
-//     const G = await AL.Game.getGData(true, false)
-//     startServer(8080, G)
-//     const observer = await AL.Game.startObserver("US", "I")
-//     addSocket("US I", observer.socket, observer)
-// }
-// run()
+async function run() {
+    await AL.Game.loginJSONFile("../../credentials.json")
+    const G = await AL.Game.getGData(true, false)
+    startServer(8080, G)
+    const observer = await AL.Game.startObserver("US", "I")
+    addSocket("US I", observer.socket, observer)
+}
+run()
