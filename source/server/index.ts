@@ -1,7 +1,8 @@
 
-import { ActionData, ChestData, ChestOpenedData, DeathData, DisappearData, DisappearingTextData, EntitiesData, GameLogData, GData, HitData, NewMapData, PlayerData, WelcomeData } from "alclient"
+import AL, { ActionData, ChestData, ChestOpenedData, DeathData, DisappearData, DisappearingTextData, EntitiesData, GameLogData, GData, HitData, NewMapData, PlayerData, WelcomeData } from "alclient"
 import Express from "express"
 import Http from "http"
+// import { diff } from "json-diff"
 import { fileURLToPath } from "url"
 import Path, { dirname } from "path"
 import * as SocketIO from "socket.io"
@@ -40,8 +41,8 @@ export function startServer(port = 8080, g: GData) {
             connection.join(newTab)
             const tabData = tabs.get(newTab)
             connection.emit("map", tabData.mapData)
-            for (const monsterData of tabData.monsters) connection.emit("monster", monsterData)
-            for (const characterData of tabData.players) connection.emit("character", characterData)
+            for (const [, monsterData] of tabData.monsters) connection.emit("monster", monsterData)
+            for (const [, characterData] of tabData.players) connection.emit("character", characterData)
         })
 
         for (const [tab] of tabs) connection.emit("newTab", tab)
@@ -114,7 +115,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         id: monster.id,
                         max_hp: monster.max_hp ?? G.monsters[monster.type].hp,
                         moving: monster.moving,
-                        s: monster.s,
+                        s: monster.s || {},
                         size: G.monsters[monster.type].size,
                         skin: G.monsters[monster.type].skin,
                         speed: monster.speed ?? G.monsters[monster.type].speed,
@@ -122,8 +123,31 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         x: monster.x,
                         y: monster.y
                     }
-                    tabData.monsters.set(monsterData.id, monsterData)
+                    // const before = tabData.monsters.get(monster.id)
+                    // if (before) {
+                    //     // Compute and send the difference
+                    //     const d = diff(before, monsterData)
+                    //     if (!d || Object.keys(d).length == 0) return // No difference
+
+                    //     const newDiff: Partial<MonsterData> = {}
+                    //     for (const key in d) {
+                    //         if (key.endsWith("__deleted")) {
+                    //             newDiff[key] = undefined
+                    //             continue
+                    //         }
+                    //         if (!d["going_to"] && key == "x") continue // Ignore certain movements
+                    //         if (!d["going_to"] && key == "y") continue // Ignore certain movements
+                    //         newDiff[key] = d[key]["__new"]
+                    //     }
+                    //     if (Object.keys(newDiff).length > 0) {
+                    //         newDiff.id = monster.id
+                    //         io.to(tabName).emit("monster", newDiff)
+                    //     }
+                    // } else {
                     io.to(tabName).emit("monster", monsterData)
+                    // }
+
+                    tabData.monsters.set(monsterData.id, monsterData)
                 }
                 for (const player of data.players) {
                     const characterData: CharacterData = {
@@ -134,15 +158,39 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         id: player.id,
                         max_hp: player.max_hp,
                         moving: player.moving,
-                        s: player.s,
+                        s: player.s || {},
                         skin: player.skin,
                         speed: player.speed,
                         target: player.target,
                         x: player.x,
                         y: player.y
                     }
-                    tabData.players.set(player.id, characterData)
+
+                    // const before = tabData.players.get(player.id)
+                    // if (before) {
+                    //     // Compute and send the difference
+                    //     const d = diff(before, characterData)
+                    //     if (!d || Object.keys(d).length == 0) return // No difference
+
+                    //     const newDiff: Partial<CharacterData> = {}
+                    //     for (const key in d) {
+                    //         if (key.endsWith("__deleted")) {
+                    //             newDiff[key] = undefined
+                    //             continue
+                    //         }
+                    //         if (!d["going_to"] && key == "x") continue // Ignore certain movements
+                    //         if (!d["going_to"] && key == "y") continue // Ignore certain movements
+                    //         newDiff[key] = d[key]["__new"]
+                    //     }
+                    //     if (Object.keys(newDiff).length > 0) {
+                    //         newDiff.id = player.id
+                    //         io.to(tabName).emit("character", newDiff)
+                    //     }
+                    // } else {
                     io.to(tabName).emit("character", characterData)
+                    // }
+
+                    tabData.players.set(player.id, characterData)
                 }
                 break
             }
@@ -170,13 +218,14 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 io.to(tabName).emit("map", mapData)
                 for (const monster of data.entities.monsters) {
                     const monsterData: MonsterData = {
+                        aa: G.monsters[monster.type].aa,
                         going_x: monster.going_x,
                         going_y: monster.going_y,
                         hp: monster.hp ?? G.monsters[monster.type].hp,
                         id: monster.id,
                         max_hp: monster.max_hp ?? G.monsters[monster.type].hp,
                         moving: monster.moving,
-                        s: monster.s,
+                        s: monster.s || {},
                         size: G.monsters[monster.type].size,
                         skin: G.monsters[monster.type].skin,
                         speed: monster.speed ?? G.monsters[monster.type].speed,
@@ -196,7 +245,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         id: player.id,
                         max_hp: player.max_hp,
                         moving: player.moving,
-                        s: player.s,
+                        s: player.s || {},
                         skin: player.skin,
                         speed: player.speed,
                         target: player.target,
@@ -224,20 +273,43 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                     id: data.id,
                     max_hp: data.max_hp,
                     moving: data.moving,
-                    s: data.s,
+                    s: data.s || {},
                     skin: data.skin,
                     speed: data.speed,
                     target: data.target,
                     x: data.x,
                     y: data.y
                 }
-                tabData.players.set(data.id, characterData)
+
+                // const before = tabData.players.get(data.id)
+                // if (before) {
+                //     // Compute and send the difference
+                //     const d = diff(before, characterData)
+                //     if (!d || Object.keys(d).length == 0) return // No difference
+
+                //     const newDiff: Partial<CharacterData> = {}
+                //     for (const key in d) {
+                //         if (key.endsWith("__deleted")) {
+                //             newDiff[key] = undefined
+                //             continue
+                //         }
+                //         if (!d["going_to"] && key == "x") continue // Ignore certain movements
+                //         if (!d["going_to"] && key == "y") continue // Ignore certain movements
+                //         newDiff[key] = d[key]["__new"]
+                //     }
+                //     if (Object.keys(newDiff).length > 0) {
+                //         newDiff.id = characterData.id
+                //         io.to(tabName).emit("character", newDiff)
+                //     }
+                // } else {
                 io.to(tabName).emit("character", characterData)
+                // }
+
+                tabData.players.set(data.id, characterData)
                 break
             }
             case "welcome": {
                 const data = args as WelcomeData
-                console.log(data)
                 const mapData: MapData = {
                     map: data.map,
                     x: data.x,
@@ -268,14 +340,14 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
     characterSocket.emit("send_updates", {})
 }
 
-// async function run() {
-//     await AL.Game.loginJSONFile("../../credentials.json")
-//     const G = await AL.Game.getGData(true, false)
-//     startServer(8080, G)
-//     const observer = await AL.Game.startObserver("US", "I")
-//     addSocket("US I", observer.socket, observer)
+async function run() {
+    await AL.Game.loginJSONFile("../../credentials.json")
+    const G = await AL.Game.getGData(true, false)
+    startServer(8080, G)
+    const observer = await AL.Game.startObserver("US", "I")
+    addSocket("US I", observer.socket, observer)
 
-//     const observer2 = await AL.Game.startObserver("US", "II")
-//     addSocket("US II", observer2.socket, observer2)
-// }
-// run()
+    const observer2 = await AL.Game.startObserver("US", "II")
+    addSocket("US II", observer2.socket, observer2)
+}
+run()

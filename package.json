@@ -1,6 +1,6 @@
 {
   "name": "algui",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "GUI Tests for the MMORPG Adventure.Land",
   "main": "build/server/index.js",
   "files": [
@@ -21,7 +21,9 @@
     "@pixi-essentials/cull": "^1.1.0",
     "@pixi/layers": "^1.0.11",
     "@types/express": "^4.17.13",
+    "@types/json-diff": "^0.7.0",
     "express": "^4.17.2",
+    "json-diff": "^0.7.1",
     "pixi-viewport": "^4.34.4",
     "pixi-webfont-loader": "^1.0.2",
     "pixi.js": "^6.2.0",

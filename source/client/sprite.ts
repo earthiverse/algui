@@ -95,7 +95,7 @@ function animate() {
             datum.sprite.play()
         }
 
-        if (datum.data.s.burned) {
+        if (datum.data.s?.burned) {
             datum.sprite.tint = 0xFF0000
         } else {
             datum.sprite.tint = 0xFFFFFF
@@ -188,7 +188,7 @@ function animate() {
             }
         }
 
-        if (datum.data.s.burned) {
+        if (datum.data.s?.burned) {
             datum.sprite.tint = 0xFF0000
         } else {
             datum.sprite.tint = 0xFFFFFF
@@ -405,9 +405,11 @@ export function renderCharacter(layers: Layers, character: CharacterData, initia
     }
 
     // Update position
-    sprite.x = character.x - sprite.width / 2
-    sprite.y = character.y - sprite.height
-    sprite.zIndex = sprite.y
+    if (character.x !== undefined) sprite.x = character.x - sprite.width / 2
+    if (character.y !== undefined) {
+        sprite.y = character.y - sprite.height
+        sprite.zIndex = sprite.y
+    }
 
     return sprite
 }
@@ -425,7 +427,6 @@ export function renderMonster(layers: Layers, monster: MonsterData, initialDirec
         layers.foreground?.addChild(sprite)
         sprite.interactive = true
         sprite.interactiveChildren = false
-
 
         // Add hp bar (will be updated in animate loop)
         const hpBar = new PIXI.Graphics()
@@ -453,14 +454,15 @@ export function renderMonster(layers: Layers, monster: MonsterData, initialDirec
         } else {
             sprite.gotoAndStop(1)
         }
-
     }
 
     // Update position
     if (monster.size && monster.size !== 1) sprite.scale.set(monster.size)
-    sprite.x = monster.x - sprite.width / 2
-    sprite.y = monster.y - sprite.height
-    sprite.zIndex = sprite.y
+    if (monster.x !== undefined) sprite.x = monster.x - sprite.width / 2
+    if (monster.y !== undefined) {
+        sprite.y = monster.y - sprite.height
+        sprite.zIndex = sprite.y
+    }
 
     return sprite
 }
