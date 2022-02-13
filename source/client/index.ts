@@ -126,6 +126,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         button.appendChild(text)
         button.onclick = () => {
             socket.emit("switchTab", tabName)
+            viewport.plugins.remove("follow")
             activeTab = tabName
         }
         menu.appendChild(button)
@@ -184,10 +185,10 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         cull.addAll(layers.foreground.children)
         const geometry: GGeometry = (G as unknown as GData).geometry[data.map]
         viewport.clamp({
+            bottom: geometry.max_y,
             left: geometry.min_x,
             right: geometry.max_x,
-            top: geometry.min_y,
-            bottom: geometry.max_y
+            top: geometry.min_y
         })
         viewport.moveCenter(data.x, data.y)
         viewport.dirty = true
@@ -198,7 +199,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     socket.on("character", (data: CharacterData) => {
         const sprite = renderCharacter(layers, data)
         if (activeTab == data.id) {
-            viewport.follow(sprite, { acceleration: data.speed / 30, radius: 10 })
+            viewport.follow(sprite, { acceleration: 10, radius: 50, speed: data.speed })
         }
     })
     socket.on("remove", (id: string) => {
