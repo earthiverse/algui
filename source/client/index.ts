@@ -109,8 +109,25 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     })
     socket.on("message", (message) => console.log(`We got ${message} back`))
     socket.on("newTab", (tabName: string) => {
-        socket.emit("switchTab", tabName)
-        activeTab = tabName
+        if (!activeTab) {
+            socket.emit("switchTab", tabName)
+            activeTab = tabName
+
+            // Create the menu
+            const menu = document.createElement("div")
+            menu.setAttribute("id", "menu")
+            document.body.appendChild(menu)
+        }
+
+        const menu = document.getElementById("menu")
+        const button = document.createElement("div")
+        button.setAttribute("class", "tab_button")
+        const text = document.createTextNode(tabName)
+        button.appendChild(text)
+        button.onclick = () => {
+            socket.emit("switchTab", tabName)
+        }
+        menu.appendChild(button)
     })
 
     socket.on("clear", () => {
