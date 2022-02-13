@@ -126,6 +126,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         button.appendChild(text)
         button.onclick = () => {
             socket.emit("switchTab", tabName)
+            activeTab = tabName
         }
         menu.appendChild(button)
     })

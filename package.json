@@ -1,6 +1,6 @@
 {
   "name": "algui",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "GUI Tests for the MMORPG Adventure.Land",
   "main": "build/server/index.js",
   "files": [

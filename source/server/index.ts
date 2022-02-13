@@ -7,7 +7,7 @@ import Path, { dirname } from "path"
 import * as SocketIO from "socket.io"
 import { Socket } from "socket.io-client"
 import { CharacterData, MonsterData } from "../definitions/client"
-import { MapData } from "../definitions/server"
+import { MapData, TabData } from "../definitions/server"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -17,7 +17,7 @@ const server = Http.createServer(app)
 let io: SocketIO.Server
 
 let G: GData
-const tabs = new Map<string, MapData>()
+const tabs = new Map<string, TabData>()
 
 export function startServer(port = 8080, g: GData) {
     G = g
@@ -32,10 +32,17 @@ export function startServer(port = 8080, g: GData) {
     io.on("connection", (connection) => {
         // Join the update channel
         connection.on("switchTab", (newTab: string) => {
-            for (const [tab] of tabs) if (tab !== newTab) connection.leave(tab)
+            if (!tabs.has(newTab)) return // Not a valid tab
+
+            // Leave all tabs
+            for (const [tab] of tabs) connection.leave(tab)
+
+            // Switch the tab
             connection.join(newTab)
-            const mapData = tabs.get(newTab)
-            if (mapData) connection.emit("map", mapData)
+            const tabData = tabs.get(newTab)
+            connection.emit("map", tabData.mapData)
+            for (const monsterData of tabData.monsters) connection.emit("monster", monsterData)
+            for (const characterData of tabData.players) connection.emit("character", characterData)
         })
 
         for (const [tab] of tabs) connection.emit("newTab", tab)
@@ -45,10 +52,13 @@ export function startServer(port = 8080, g: GData) {
 export function addSocket(tabName: string, characterSocket: Socket, initialPosition: MapData = { map: "main", x: 0, y: 0 }) {
     if (!tabs.has(tabName)) {
         tabs.set(tabName, {
-            map: initialPosition.map,
-            x: initialPosition.x,
-            y: initialPosition.y
-        })
+            mapData: {
+                map: initialPosition.map,
+                x: initialPosition.x,
+                y: initialPosition.y
+            },
+            monsters: new Map(),
+            players: new Map() })
         io.emit("newTab", tabName)
     }
     characterSocket.onAny((eventName, args) => {
@@ -66,11 +76,15 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
             case "death": {
                 const data = args as DeathData
                 // TODO: Render gravestone for players
+                const tabData = tabs.get(tabName)
+                tabData.monsters.delete(data.id) || tabData.players.delete(data.id)
                 io.to(tabName).emit("remove", data.id)
                 break
             }
             case "disappear": {
                 const data = args as DisappearData
+                const tabData = tabs.get(tabName)
+                tabData.monsters.delete(data.id) || tabData.players.delete(data.id)
                 io.to(tabName).emit("remove", data.id)
                 break
             }
@@ -86,7 +100,12 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
             }
             case "entities": {
                 const data = args as EntitiesData
-                if (data.type == "all") io.to(tabName).emit("clear")
+                const tabData = tabs.get(tabName)
+                if (data.type == "all") {
+                    io.to(tabName).emit("clear")
+                    tabData.monsters.clear()
+                    tabData.players.clear()
+                }
                 for (const monster of data.monsters) {
                     const monsterData: MonsterData = {
                         aa: G.monsters[monster.type].aa,
@@ -104,6 +123,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         x: monster.x,
                         y: monster.y
                     }
+                    tabData.monsters.set(monsterData.id, monsterData)
                     io.to(tabName).emit("monster", monsterData)
                 }
                 for (const player of data.players) {
@@ -122,6 +142,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         x: player.x,
                         y: player.y
                     }
+                    tabData.players.set(player.id, characterData)
                     io.to(tabName).emit("character", characterData)
                 }
                 break
@@ -143,7 +164,10 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                     x: data.x,
                     y: data.y
                 }
-                tabs.set(tabName, mapData)
+                const tabData = tabs.get(tabName)
+                tabData.mapData = mapData
+                tabData.monsters.clear()
+                tabData.players.clear()
                 io.to(tabName).emit("map", mapData)
                 for (const monster of data.entities.monsters) {
                     const monsterData: MonsterData = {
@@ -161,6 +185,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         x: monster.x,
                         y: monster.y
                     }
+                    tabData.monsters.set(monsterData.id, monsterData)
                     io.to(tabName).emit("monster", monsterData)
                 }
                 for (const player of data.entities.players) {
@@ -179,6 +204,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         x: player.x,
                         y: player.y
                     }
+                    tabData.players.set(player.id, characterData)
                     io.to(tabName).emit("character", characterData)
                 }
                 break
@@ -187,12 +213,9 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 const data = args as PlayerData
 
                 // Update Map Data
-                const mapData = tabs.get(tabName)
-                if (mapData) {
-                    mapData.x = data.x
-                    mapData.y = data.y
-                }
-                tabs.set(tabName, mapData)
+                const tabData = tabs.get(tabName)
+                tabData.mapData.x = data.x
+                tabData.mapData.y = data.y
 
                 const characterData: CharacterData = {
                     cx: data.cx,
@@ -209,6 +232,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                     x: data.x,
                     y: data.y
                 }
+                tabData.players.set(data.id, characterData)
                 io.to(tabName).emit("character", characterData)
                 break
             }
@@ -220,7 +244,8 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                     x: data.x,
                     y: data.y
                 }
-                tabs.set(tabName, mapData)
+                const tabData = tabs.get(tabName)
+                tabData.mapData = mapData
                 io.to(tabName).emit("map", mapData)
                 break
             }
