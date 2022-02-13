@@ -8,8 +8,8 @@ import * as SocketIO from "socket.io-client"
 import "./index.css"
 import { renderMap } from "./map"
 import { removeAllSprites, removeSprite, renderCharacter, renderMonster } from "./sprite"
-import { MapData } from "../definitions/server"
-import { CharacterData, Layers, MonsterData } from "../definitions/client"
+import { CharacterData, MapData, MonsterData } from "../definitions/server"
+import { Layers } from "../definitions/client"
 import G from "../G.json"
 
 // Setup web font loader

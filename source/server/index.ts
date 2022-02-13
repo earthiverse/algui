@@ -6,8 +6,7 @@ import { fileURLToPath } from "url"
 import Path, { dirname } from "path"
 import * as SocketIO from "socket.io"
 import { Socket } from "socket.io-client"
-import { CharacterData, MonsterData } from "../definitions/client"
-import { MapData, TabData } from "../definitions/server"
+import { CharacterData, MonsterData, MapData, TabData } from "../definitions/server"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)

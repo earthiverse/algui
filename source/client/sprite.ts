@@ -2,7 +2,8 @@ import * as PIXI from "pixi.js"
 import { GData } from "alclient"
 import { getCosmeticFaceTextures, getCosmeticHairTextures, getCosmeticHatTextures, getCosmeticMakeupTextures, getSkinColorTextures, getSkinTextures, getSkinType } from "./texture"
 import G from "../G.json"
-import { CharacterData, Layers, MonsterData } from "../definitions/client"
+import { Layers } from "../definitions/client"
+import { CharacterData, MonsterData } from "../definitions/server"
 
 export type MonsterSpriteData = {
     data: MonsterData

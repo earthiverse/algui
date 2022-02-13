@@ -1,5 +1,37 @@
-import { MapName } from "alclient"
-import { CharacterData, MonsterData } from "./client"
+import { CXData, MapName, StatusInfo } from "alclient"
+
+export type CharacterData = {
+    cx?: CXData
+    hp: number
+    id: string
+    going_x: number
+    going_y: number
+    max_hp: number
+    moving: boolean
+    s: StatusInfo
+    skin: string
+    speed: number
+    target?: string
+    x: number
+    y: number
+}
+
+export type MonsterData = {
+    aa?: number
+    hp: number
+    id: string
+    going_x: number
+    going_y: number
+    max_hp: number
+    moving: boolean
+    s: StatusInfo
+    size?: number
+    skin: string
+    speed: number
+    target?: string
+    x: number
+    y: number
+}
 
 /** Signal to change the map, and center it at the coordinates provided */
 export type MapData = {
