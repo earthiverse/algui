@@ -69,6 +69,11 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 io.to(tabName).emit("remove", data.id)
                 break
             }
+            case "disappear": {
+                const data = args as DisappearData
+                io.to(tabName).emit("remove", data.id)
+                break
+            }
             case "disappearing_text": {
                 const data = args as DisappearingTextData
                 // TODO: Animate text?
