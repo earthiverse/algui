@@ -1,7 +1,7 @@
 import { GData, GGeometry, MapName } from "alclient"
 import * as PIXI from "pixi.js"
 import { Cull } from "@pixi-essentials/cull"
-import { Layer, Stage } from "@pixi/layers"
+import { Stage } from "@pixi/layers"
 import { Viewport } from "pixi-viewport"
 import { WebfontLoaderPlugin } from "pixi-webfont-loader"
 import * as SocketIO from "socket.io-client"

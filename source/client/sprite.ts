@@ -4,6 +4,7 @@ import { getCosmeticFaceTextures, getCosmeticHairTextures, getCosmeticHatTexture
 import G from "../G.json"
 import { Layers } from "../definitions/client"
 import { CharacterData, MonsterData } from "../definitions/server"
+import { addFilter, BURNED_FILTER, removeFilter } from "./filters"
 
 export type MonsterSpriteData = {
     data: MonsterData
@@ -96,9 +97,11 @@ function animate() {
         }
 
         if (datum.data.s?.burned) {
-            datum.sprite.tint = 0xFF0000
+            // Add the burned filter
+            addFilter(datum.sprite, BURNED_FILTER)
         } else {
-            datum.sprite.tint = 0xFFFFFF
+            // Remove the burned filter
+            removeFilter(datum.sprite, BURNED_FILTER)
         }
 
         // Update HP Bar
@@ -189,9 +192,11 @@ function animate() {
         }
 
         if (datum.data.s?.burned) {
-            datum.sprite.tint = 0xFF0000
+            // Add the burned filter
+            addFilter(datum.sprite, BURNED_FILTER)
         } else {
-            datum.sprite.tint = 0xFFFFFF
+            // Remove the burned filter
+            removeFilter(datum.sprite, BURNED_FILTER)
         }
 
         // Update HP Bar

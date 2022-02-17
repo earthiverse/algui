@@ -17,7 +17,9 @@ canvas {
 }
 
 .tab_button {
+  cursor: pointer;
   margin:5px;
   min-width: 100px;
   text-align: center;
+  user-select: none;
 }
