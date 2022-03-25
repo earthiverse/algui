@@ -34,7 +34,7 @@
     "@types/offscreencanvas": "^2019.6.4",
     "@typescript-eslint/eslint-plugin": "^5.10.2",
     "@typescript-eslint/parser": "^5.10.2",
-    "alclient": "^0.9.28",
+    "alclient": "^0.9.61",
     "copy-webpack-plugin": "^10.2.4",
     "copyfiles": "^2.4.1",
     "css-loader": "^6.5.1",
