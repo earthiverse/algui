@@ -132,10 +132,12 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         console.log(`Switching map to ${data.map},${data.x},${data.y}`)
         removeAllSprites()
         if (lastMap !== data.map) {
-            // Check the cache
-            const cache = mapCache.get(data.map)
+            // Remove the background and foreground
             viewport.removeChild(layers.background)
             viewport.removeChild(layers.foreground)
+
+            // Check the cache
+            const cache = mapCache.get(data.map)
             if (cache) {
                 layers.background = cache.background
                 layers.foreground = cache.foreground

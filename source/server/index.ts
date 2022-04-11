@@ -346,15 +346,3 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
     // Send a request to get all the entities so that everything renders correctly on the GUI
     characterSocket.emit("send_updates", {})
 }
-
-// async function run() {
-//     await AL.Game.loginJSONFile("../../credentials.json")
-//     const G = await AL.Game.getGData(true, false)
-//     startServer(8080, G)
-//     const observer = await AL.Game.startObserver("US", "I")
-//     addSocket("US I", observer.socket, observer)
-
-//     const observer2 = await AL.Game.startObserver("US", "II")
-//     addSocket("US II", observer2.socket, observer2)
-// }
-// run()

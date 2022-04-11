@@ -114,7 +114,7 @@ function animate() {
             hpBar.scale.set(1 / datum.sprite.scale.x, 1 / datum.sprite.scale.y)
         }
 
-        datum.sprite.zIndex = datum.sprite.y
+        datum.sprite.zIndex = datum.data.y
     }
     for (const id of monstersToDelete) {
         const datum = monsters.get(id)
@@ -209,7 +209,7 @@ function animate() {
             hpBar.scale.set(1 / datum.sprite.scale.x, 1 / datum.sprite.scale.y)
         }
 
-        datum.sprite.zIndex = datum.sprite.y
+        datum.sprite.zIndex = datum.data.y
     }
 }
 PIXI.Ticker.shared.add(animate)
@@ -414,7 +414,7 @@ export function renderCharacter(layers: Layers, character: UICharacterData, init
     if (character.x !== undefined) sprite.x = character.x - sprite.width / 2
     if (character.y !== undefined) {
         sprite.y = character.y - sprite.height
-        sprite.zIndex = sprite.y
+        sprite.zIndex = character.y
     }
 
     return sprite
@@ -468,7 +468,7 @@ export function renderMonster(layers: Layers, monster: UIMonsterData, initialDir
     if (monster.x !== undefined) sprite.x = monster.x - sprite.width / 2
     if (monster.y !== undefined) {
         sprite.y = monster.y - sprite.height
-        sprite.zIndex = sprite.y
+        sprite.zIndex = monster.y
     }
 
     return sprite
