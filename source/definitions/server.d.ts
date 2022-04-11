@@ -1,6 +1,6 @@
-import { CXData, MapName, StatusInfo } from "alclient"
+import { BankInfo, CXData, MapName, StatusInfo } from "alclient"
 
-export type CharacterData = {
+export type UICharacterData = {
     cx?: CXData
     hp: number
     id: string
@@ -16,7 +16,7 @@ export type CharacterData = {
     y: number
 }
 
-export type MonsterData = {
+export type UIMonsterData = {
     aa?: number
     hp: number
     id: string
@@ -40,8 +40,23 @@ export type MapData = {
     y: number
 }
 
-export type TabData = {
+export type UIData = {
     mapData: MapData
-    monsters: Map<string, MonsterData>
-    players: Map<string, CharacterData>
+    monsters: Map<string, UIMonsterData>
+    players: Map<string, UICharacterData>
+    bank?: BankInfo
+}
+
+export type ServerToClientEvents = {
+    "bank": (bankInfo: BankInfo) => void
+    "character": (characterData: UICharacterData) => void
+    "map": (mapData: MapData) => void
+    "monster": (MonsterData: UIMonsterData) => void
+    "newTab": (tabName: string) => void
+    "remove": (entityID: string) => void
+    "removeAll": () => void
+}
+
+export type ClientToServerEvents = {
+    "switchTab": (tabName: string) => void
 }

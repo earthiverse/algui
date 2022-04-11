@@ -3,11 +3,11 @@ import { GData } from "alclient"
 import { getCosmeticFaceTextures, getCosmeticHairTextures, getCosmeticHatTextures, getCosmeticMakeupTextures, getSkinColorTextures, getSkinTextures, getSkinType } from "./texture"
 import G from "../G.json"
 import { Layers } from "../definitions/client"
-import { CharacterData, MonsterData } from "../definitions/server"
 import { addFilter, BURNED_FILTER, removeFilter } from "./filters"
+import { UICharacterData, UIMonsterData } from "../definitions/server"
 
 export type MonsterSpriteData = {
-    data: MonsterData
+    data: UIMonsterData
     lastDirection: number
     focusedHover?: boolean
     hpBar: PIXI.Graphics
@@ -16,7 +16,7 @@ export type MonsterSpriteData = {
 }
 
 export type CharacterSpriteData = {
-    data: CharacterData
+    data: UICharacterData
     lastDirection: number
     focusedHover?: boolean
     hpBar: PIXI.Graphics
@@ -253,7 +253,7 @@ export function removeAllSprites() {
     monsters.clear()
 }
 
-export function renderCharacter(layers: Layers, character: CharacterData, initialDirection = 0): PIXI.AnimatedSprite {
+export function renderCharacter(layers: Layers, character: UICharacterData, initialDirection = 0): PIXI.AnimatedSprite {
     // TODO: Update so we don't have to keep destroying the character...
     // Remove the old sprite
     let sprite: PIXI.AnimatedSprite
@@ -419,7 +419,7 @@ export function renderCharacter(layers: Layers, character: CharacterData, initia
     return sprite
 }
 
-export function renderMonster(layers: Layers, monster: MonsterData, initialDirection = 0): PIXI.AnimatedSprite {
+export function renderMonster(layers: Layers, monster: UIMonsterData, initialDirection = 0): PIXI.AnimatedSprite {
     let sprite: PIXI.AnimatedSprite
     if (monsters.has(monster.id)) {
         // Update the data

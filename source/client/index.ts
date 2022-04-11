@@ -8,12 +8,12 @@ import * as SocketIO from "socket.io-client"
 import "./index.css"
 import { renderMap } from "./map"
 import { removeAllSprites, removeSprite, renderCharacter, renderMonster } from "./sprite"
-import { CharacterData, MapData, MonsterData } from "../definitions/server"
+import { UICharacterData, ClientToServerEvents, MapData, UIMonsterData, ServerToClientEvents } from "../definitions/server"
 import { Layers } from "../definitions/client"
 import G from "../G.json"
 
 // Setup web font loader
-PIXI.Loader.registerPlugin(WebfontLoaderPlugin)
+PIXI.Loader.registerPlugin(new WebfontLoaderPlugin())
 
 // These settings make PIXI work well for pixel art based games
 PIXI.settings.ROUND_PIXELS = true
@@ -102,12 +102,11 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     }
 
     let activeTab: string
-    const socket = SocketIO.io({
+    const socket: SocketIO.Socket<ServerToClientEvents, ClientToServerEvents> = SocketIO.io({
         autoConnect: true,
         reconnection: true,
         transports: ["websocket"]
     })
-    socket.on("message", (message) => console.log(`We got ${message} back`))
     socket.on("newTab", (tabName: string) => {
         if (!activeTab) {
             socket.emit("switchTab", tabName)
@@ -132,7 +131,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         menu.appendChild(button)
     })
 
-    socket.on("clear", () => {
+    socket.on("removeAll", () => {
         removeAllSprites()
     })
 
@@ -150,12 +149,11 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         if (lastMap !== data.map) {
             // Check the cache
             const cache = mapCache.get(data.map)
+            viewport.removeChild(layers.background)
+            viewport.removeChild(layers.foreground)
             if (cache) {
-                viewport.removeChild(layers.background)
-                viewport.removeChild(layers.foreground)
                 layers.background = cache.background
                 layers.foreground = cache.foreground
-                console.log(`cached foreground sort: ${layers.foreground.sortableChildren}`)
                 viewport.addChild(layers.background)
                 viewport.addChild(layers.foreground)
             } else {
@@ -193,10 +191,10 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         viewport.moveCenter(data.x, data.y)
         viewport.dirty = true
     })
-    socket.on("monster", (data: MonsterData) => {
+    socket.on("monster", (data: UIMonsterData) => {
         renderMonster(layers, data)
     })
-    socket.on("character", (data: CharacterData) => {
+    socket.on("character", (data: UICharacterData) => {
         const sprite = renderCharacter(layers, data)
         if (activeTab == data.id) {
             viewport.follow(sprite, { acceleration: 10, radius: 50, speed: data.speed })
