@@ -6,6 +6,7 @@ import { Layers } from "../definitions/client"
 
 function createTile(texture: PIXI.Texture, x: number, y: number) {
     const tile = new PIXI.Sprite(texture)
+    tile.cullable = true
     tile.x = x
     tile.y = y
     tile.width = texture.width
@@ -15,6 +16,7 @@ function createTile(texture: PIXI.Texture, x: number, y: number) {
 
 function createAnimatedTile(textures: PIXI.Texture[], x: number, y: number) {
     const tile = new PIXI.AnimatedSprite(textures)
+    tile.cullable = true
     tile.x = x
     tile.y = y
     tile.width = textures[0].width
@@ -123,6 +125,7 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, layer
     if (geometry.groups) {
         for (const group of geometry.groups) {
             const groupTile: PIXI.Container = new PIXI.Container()
+            groupTile.cullable = true
             let minX = Number.MAX_SAFE_INTEGER
             let minY = Number.MAX_SAFE_INTEGER
             let isGroupAnimated = false

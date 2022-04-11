@@ -277,6 +277,7 @@ export function renderCharacter(layers: Layers, character: UICharacterData, init
             textures = getSkinColorTextures(character.cx.head)
         }
         sprite = new PIXI.AnimatedSprite(textures[initialDirection])
+        sprite.cullable = true
         sprite.interactive = true
         sprite.interactiveChildren = false
         sprite.sortableChildren = true
@@ -429,9 +430,10 @@ export function renderMonster(layers: Layers, monster: UIMonsterData, initialDir
     } else {
         const textures = getSkinTextures(monster.skin)
         sprite = new PIXI.AnimatedSprite(textures[initialDirection])
-        layers.foreground?.addChild(sprite)
+        sprite.cullable = true
         sprite.interactive = true
         sprite.interactiveChildren = false
+        layers.foreground?.addChild(sprite)
 
         // Add hp bar (will be updated in animate loop)
         const hpBar = new PIXI.Graphics()

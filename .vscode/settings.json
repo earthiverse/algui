@@ -4,6 +4,7 @@
         "alclient",
         "algui",
         "ctype",
+        "cullable",
         "facemakeup",
         "lskin",
         "marmor",

@@ -1,6 +1,5 @@
 import { GData, GGeometry, MapName } from "alclient"
 import * as PIXI from "pixi.js"
-import { Cull } from "@pixi-essentials/cull"
 import { Stage } from "@pixi/layers"
 import { Viewport } from "pixi-viewport"
 import { WebfontLoaderPlugin } from "pixi-webfont-loader"
@@ -45,19 +44,6 @@ function resize() {
     viewport.resize(window.innerWidth, window.innerHeight)
 }
 resize()
-
-const cull = new Cull({
-    recursive: false,
-    toggle: "visible"
-})
-cull.addAll(viewport.children)
-viewport.on("frame-end", function () {
-    if (viewport.dirty) {
-        console.log("Culling!")
-        cull.cull(app.renderer.screen)
-        viewport.dirty = false
-    }
-})
 
 // Preload font
 PIXI.Loader.shared.add({ name: "m5x7", url: "./assets/m5x7.woff2" })
@@ -144,7 +130,6 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         currentMap = data.map
         text.text = `map: ${data.map}, x: ${data.x.toFixed(2)}, y: ${data.y.toFixed(2)}`
         console.log(`Switching map to ${data.map},${data.x},${data.y}`)
-        cull.clear()
         removeAllSprites()
         if (lastMap !== data.map) {
             // Check the cache
@@ -179,8 +164,6 @@ PIXI.Loader.shared.load().onComplete.add(() => {
 
             lastMap = data.map
         }
-        cull.addAll(layers.background.children)
-        cull.addAll(layers.foreground.children)
         const geometry: GGeometry = (G as unknown as GData).geometry[data.map]
         viewport.clamp({
             bottom: geometry.max_y,
