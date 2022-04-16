@@ -55,6 +55,7 @@ export type ServerToClientEvents = {
     "newTab": (tabName: string) => void
     "remove": (entityID: string) => void
     "removeAll": () => void
+    "removeTab": (tabName: string) => void
 }
 
 export type ClientToServerEvents = {

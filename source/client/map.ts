@@ -125,10 +125,12 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, layer
             const groupTile: PIXI.Container = new PIXI.Container()
             let minX = Number.MAX_SAFE_INTEGER
             let minY = Number.MAX_SAFE_INTEGER
+            let maxY = Number.MIN_SAFE_INTEGER
             let isGroupAnimated = false
             for (const [index, x1, y1, x2, y2] of group) {
                 if (x1 < minX) minX = x1
                 if (y1 < minY) minY = y1
+                if (y2 > maxY) maxY = y2
                 const textures = getMapTextures(map, index)
                 if (textures.length == 1) {
                     const texture = textures[0]
@@ -157,7 +159,7 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, layer
             groupTile.cacheAsBitmap = !isGroupAnimated
             groupTile.x = minX
             groupTile.y = minY
-            groupTile.zIndex = groupTile.y
+            groupTile.zIndex = groupTile.y - (maxY - minY)
             for (const child of groupTile.children) {
                 child.x -= minX
                 child.y -= minY

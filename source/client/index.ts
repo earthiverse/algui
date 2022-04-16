@@ -21,7 +21,7 @@ PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.LOW
 
 // Add the view to the DOM
 const app = new PIXI.Application({
-    backgroundAlpha: 0
+    backgroundColor: 0x000000
 })
 app.stage = new Stage()
 document.body.appendChild(app.view)
@@ -94,6 +94,9 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         transports: ["websocket"]
     })
     socket.on("newTab", (tabName: string) => {
+        const tabID = `tab_${tabName}`
+        if (document.getElementById(tabID)) return // Already have a button
+
         if (!activeTab) {
             socket.emit("switchTab", tabName)
             activeTab = tabName
@@ -106,6 +109,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
 
         const menu = document.getElementById("menu")
         const button = document.createElement("div")
+        button.id = tabID
         button.setAttribute("class", "tab_button")
         const text = document.createTextNode(tabName)
         button.appendChild(text)
@@ -166,13 +170,13 @@ PIXI.Loader.shared.load().onComplete.add(() => {
 
             lastMap = data.map
         }
-        const geometry: GGeometry = (G as unknown as GData).geometry[data.map]
-        viewport.clamp({
-            bottom: geometry.max_y,
-            left: geometry.min_x,
-            right: geometry.max_x,
-            top: geometry.min_y
-        })
+        // const geometry: GGeometry = (G as unknown as GData).geometry[data.map]
+        // viewport.clamp({
+        //     bottom: geometry.max_y,
+        //     left: geometry.min_x,
+        //     right: geometry.max_x,
+        //     top: geometry.min_y
+        // })
         viewport.moveCenter(data.x, data.y)
         viewport.dirty = true
     })
@@ -182,7 +186,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     socket.on("character", (data: UICharacterData) => {
         const sprite = renderCharacter(layers, data)
         if (activeTab == data.id) {
-            viewport.follow(sprite, { acceleration: 10, radius: 50, speed: data.speed })
+            viewport.follow(sprite, { radius: 50, speed: 0 })
         }
     })
     socket.on("remove", (id: string) => {

@@ -24,7 +24,7 @@
         "watch": false
     },
     "include": [
-        "source/server"
+        "source"
     ],
     "exclude": [
         "build",

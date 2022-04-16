@@ -94,6 +94,12 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 // TODO: Animate text?
                 break
             }
+            case "disconnect": {
+                // Remove the tab
+                observers.delete(tabName)
+                io.to(tabName).emit("removeTab", tabName)
+                break
+            }
             case "drop": {
                 const data = args as ChestData
                 // TODO: Animate chest
