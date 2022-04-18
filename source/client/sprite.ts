@@ -3,7 +3,7 @@ import { GData } from "alclient"
 import { getCosmeticFaceTextures, getCosmeticHairTextures, getCosmeticHatTextures, getCosmeticMakeupTextures, getSkinColorTextures, getSkinTextures, getSkinType } from "./texture"
 import G from "../G.json"
 import { Layers } from "../definitions/client"
-import { addFilter, BURNED_FILTER, removeFilter } from "./filters"
+import { addFilter, BURNED_FILTER, POISONED_FILTER, removeFilter } from "./filters"
 import { UICharacterData, UIMonsterData } from "../definitions/server"
 
 export type MonsterSpriteData = {
@@ -96,13 +96,11 @@ function animate() {
             datum.sprite.play()
         }
 
-        if (datum.data.s?.burned) {
-            // Add the burned filter
-            addFilter(datum.sprite, BURNED_FILTER)
-        } else {
-            // Remove the burned filter
-            removeFilter(datum.sprite, BURNED_FILTER)
-        }
+        // Filters for status affects
+        if (datum.data.s?.burned) addFilter(datum.sprite, BURNED_FILTER)
+        else removeFilter(datum.sprite, BURNED_FILTER)
+        if (datum.data.s?.poisoned) addFilter(datum.sprite, POISONED_FILTER)
+        else removeFilter(datum.sprite, POISONED_FILTER)
 
         // Update HP Bar
         const hpBar = datum.hpBar
@@ -277,7 +275,7 @@ export function renderCharacter(layers: Layers, character: UICharacterData, init
             textures = getSkinColorTextures(character.cx.head)
         }
         sprite = new PIXI.AnimatedSprite(textures[initialDirection])
-        sprite.cullable = true
+        // sprite.cullable = true
         sprite.interactive = true
         sprite.interactiveChildren = false
         sprite.sortableChildren = true
@@ -411,11 +409,9 @@ export function renderCharacter(layers: Layers, character: UICharacterData, init
     }
 
     // Update position
-    if (character.x !== undefined) sprite.x = character.x - sprite.width / 2
-    if (character.y !== undefined) {
-        sprite.y = character.y - sprite.height
-        sprite.zIndex = character.y
-    }
+    sprite.x = character.x - sprite.width / 2
+    sprite.y = character.y - sprite.height
+    sprite.zIndex = character.y
 
     return sprite
 }
@@ -430,7 +426,7 @@ export function renderMonster(layers: Layers, monster: UIMonsterData, initialDir
     } else {
         const textures = getSkinTextures(monster.skin)
         sprite = new PIXI.AnimatedSprite(textures[initialDirection])
-        sprite.cullable = true
+        // sprite.cullable = true
         sprite.interactive = true
         sprite.interactiveChildren = false
         layers.foreground?.addChild(sprite)

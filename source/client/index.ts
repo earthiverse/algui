@@ -7,9 +7,10 @@ import * as SocketIO from "socket.io-client"
 import "./index.css"
 import { renderMap } from "./map"
 import { removeAllSprites, removeSprite, renderCharacter, renderMonster } from "./sprite"
-import { UICharacterData, ClientToServerEvents, MapData, UIMonsterData, ServerToClientEvents } from "../definitions/server"
+import { UICharacterData, ClientToServerEvents, MapData, UIMonsterData, ServerToClientEvents, UIProjectileData } from "../definitions/server"
 import { Layers } from "../definitions/client"
 import G from "../G.json"
+import { renderProjectile } from "./projectile"
 
 // Setup web font loader
 PIXI.Loader.registerPlugin(new WebfontLoaderPlugin())
@@ -188,6 +189,9 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         if (activeTab == data.id) {
             viewport.follow(sprite, { radius: 50, speed: 0 })
         }
+    })
+    socket.on("projectile", (data: UIProjectileData) => {
+        renderProjectile(layers, data)
     })
     socket.on("remove", (id: string) => {
         removeSprite(id)

@@ -1,6 +1,6 @@
 {
   "name": "algui",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "GUI Tests for the MMORPG Adventure.Land",
   "main": "build/algui/index.js",
   "files": [
@@ -34,7 +34,7 @@
     "@types/offscreencanvas": "^2019.6.4",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.18.0",
-    "alclient": "^0.9.73",
+    "alclient": "^0.9.80",
     "copy-webpack-plugin": "^10.2.4",
     "copyfiles": "^2.4.1",
     "css-loader": "^6.7.1",

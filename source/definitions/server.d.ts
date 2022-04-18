@@ -1,4 +1,4 @@
-import { BankInfo, CXData, MapName, StatusInfo } from "alclient"
+import { BankInfo, CXData, MapName, ProjectileName, StatusInfo } from "alclient"
 
 export type UICharacterData = {
     cx?: CXData
@@ -33,6 +33,15 @@ export type UIMonsterData = {
     y: number
 }
 
+export type UIProjectileData = {
+    going_x: number
+    going_y: number
+    pid: string
+    projectile: ProjectileName
+    x: number
+    y: number
+}
+
 /** Signal to change the map, and center it at the coordinates provided */
 export type MapData = {
     map: MapName
@@ -53,6 +62,7 @@ export type ServerToClientEvents = {
     "map": (mapData: MapData) => void
     "monster": (MonsterData: UIMonsterData) => void
     "newTab": (tabName: string) => void
+    "projectile": (projectileData: UIProjectileData) => void
     "remove": (entityID: string) => void
     "removeAll": () => void
     "removeTab": (tabName: string) => void

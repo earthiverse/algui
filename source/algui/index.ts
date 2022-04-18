@@ -7,7 +7,9 @@ import { fileURLToPath } from "url"
 import Path, { dirname } from "path"
 import * as SocketIO from "socket.io"
 import { Socket } from "socket.io-client"
-import { UICharacterData, UIMonsterData, MapData, UIData, ServerToClientEvents, ClientToServerEvents } from "../definitions/server"
+import { UICharacterData, UIMonsterData, MapData, UIData, ServerToClientEvents, ClientToServerEvents, UIProjectileData } from "../definitions/server"
+import { ActionDataProjectile } from "alclient"
+import { ActionDataRay } from "alclient"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -40,7 +42,7 @@ export function startServer(port = 8080, g: GData) {
             // Switch the tab
             connection.join(newTab)
             const tabData = observers.get(newTab)
-            connection.emit("map", tabData.mapData)
+            if (tabData.mapData) connection.emit("map", tabData.mapData)
             for (const [, monsterData] of tabData.monsters) connection.emit("monster", monsterData)
             for (const [, characterData] of tabData.players) connection.emit("character", characterData)
             if (tabData.bank) connection.emit("bank", tabData.bank)
@@ -65,8 +67,27 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
     characterSocket.onAny((eventName, args) => {
         switch (eventName) {
             case "action": {
-                const data = args as ActionData
-                // TODO: Animate projectile
+                const tabData = observers.get(tabName)
+                const attacker = tabData.players.get(args.attacker) ?? tabData.monsters.get(args.attacker)
+                if (!attacker) break // We don't know where the projectile originated
+
+                if (args.ray) {
+                    const data = args as ActionDataRay
+
+                    // TODO: We don't have code to render rays yet
+                } else if (args.projectile) {
+                    const data = args as ActionDataProjectile
+
+                    const projectileData: UIProjectileData = {
+                        going_x: data.x,
+                        going_y: data.y,
+                        pid: data.pid,
+                        projectile: data.projectile,
+                        x: attacker.x,
+                        y: attacker.y
+                    }
+                    io.to(tabName).emit("projectile", projectileData)
+                }
                 break
             }
             case "chest_opened": {

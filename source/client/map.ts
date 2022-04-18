@@ -10,6 +10,8 @@ function createTile(texture: PIXI.Texture, x: number, y: number) {
     tile.y = y
     tile.width = texture.width
     tile.height = texture.height
+    tile.interactive = false
+    tile.interactiveChildren = false
     return tile
 }
 
@@ -20,6 +22,8 @@ function createAnimatedTile(textures: PIXI.Texture[], x: number, y: number) {
     tile.width = textures[0].width
     tile.height = textures[0].height
     tile.animationSpeed = 1 / 30
+    tile.interactive = false
+    tile.interactiveChildren = false
     tile.play()
     return tile
 }
@@ -123,6 +127,8 @@ export function renderMap(renderer: PIXI.Renderer | PIXI.AbstractRenderer, layer
     if (geometry.groups) {
         for (const group of geometry.groups) {
             const groupTile: PIXI.Container = new PIXI.Container()
+            groupTile.interactive = false
+            groupTile.interactiveChildren = false
             let minX = Number.MAX_SAFE_INTEGER
             let minY = Number.MAX_SAFE_INTEGER
             let maxY = Number.MIN_SAFE_INTEGER

@@ -8,6 +8,13 @@ BURNED_FILTER.matrix[0] = 255
 BURNED_FILTER.matrix[6] = 0
 BURNED_FILTER.matrix[12] = 0
 
+// A purple filter to apply to entities and characters who are poisoned
+export const POISONED_FILTER = new PIXI.filters.ColorMatrixFilter()
+POISONED_FILTER.alpha = 0.5
+POISONED_FILTER.matrix[0] = 127
+POISONED_FILTER.matrix[6] = 1
+POISONED_FILTER.matrix[12] = 254
+
 export function addFilter(object: Container, filter: Filter) {
     if (object.filters && object.filters.includes(filter)) return // Filter is already applied
 

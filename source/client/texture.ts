@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js"
-import { GData, GGeometry, MapName, MonsterName } from "alclient"
+import { AnimationName, GData, GGeometry, MapName, MonsterName, ProjectileName } from "alclient"
 import G from "../G.json"
 
 // Base textures hold the image
@@ -13,12 +13,30 @@ const getBaseTexture = (id: string, file: string): PIXI.BaseTexture => {
     return baseTexture
 }
 
+const animationTexturesCache = new Map<string, PIXI.Texture[]>()
+export const getAnimationTextures = (animation: AnimationName) => {
+    let textures = animationTexturesCache.get(animation)
+    if (textures) return textures
+
+    const gAnimation = (G as unknown as GData).animations[animation]
+    const file = gAnimation.file.split(/[?#]/)[0]
+    const baseTexture = getBaseTexture(animation, `.${file}`)
+    textures = []
+    const frame_width = baseTexture.width / gAnimation.frames
+    const frame_height = baseTexture.height
+    for (let i = 0; i < gAnimation.frames; i++) {
+        const x = i * frame_width
+        const frame = new PIXI.Rectangle(x, 0, frame_width, frame_height)
+        textures.push(new PIXI.Texture(baseTexture, frame))
+    }
+    return textures
+}
+
 const cosmeticFaceTexturesCache = new Map<string, PIXI.Texture[][]>()
 export const getCosmeticFaceTextures = (skin: string) => {
     let textures = cosmeticFaceTexturesCache.get(skin)
     if (textures) return textures
 
-    // TODO: Implement
     const gSprites = (G as unknown as GData).sprites
     let found = false
     for (const spriteName in gSprites) {
@@ -110,7 +128,6 @@ export const getCosmeticHatTextures = (skin: string) => {
     let textures = cosmeticHatTexturesCache.get(skin)
     if (textures) return textures
 
-    // TODO: Implement
     const gSprites = (G as unknown as GData).sprites
     let found = false
     for (const spriteName in gSprites) {
@@ -156,7 +173,6 @@ export const getCosmeticHeadTextures = (skin: string) => {
     let textures = cosmeticHeadTexturesCache.get(skin)
     if (textures) return textures
 
-    // TODO: Implement
     const gSprites = (G as unknown as GData).sprites
     let found = false
     for (const spriteName in gSprites) {
@@ -202,7 +218,6 @@ export const getCosmeticMakeupTextures = (skin: string) => {
     let textures = cosmeticMakeupTexturesCache.get(skin)
     if (textures) return textures
 
-    // TODO: Implement
     const gSprites = (G as unknown as GData).sprites
     let found = false
     for (const spriteName in gSprites) {
@@ -275,6 +290,11 @@ export const getMapTextures = (map: MapName, index: number): PIXI.Texture[] => {
         mapTextures.set(index, [texture])
         return [texture]
     }
+}
+
+export const getProjectileTextures = (projectile: ProjectileName) => {
+    const gProjectile = (G as unknown as GData).projectiles[projectile]
+    return getAnimationTextures(gProjectile.animation)
 }
 
 const skinColorTexturesCache = new Map<string, PIXI.Texture[][]>()
