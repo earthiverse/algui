@@ -42,6 +42,15 @@ export type UIProjectileData = {
     y: number
 }
 
+export type UIRayData = {
+    going_x: number
+    going_y: number
+    pid: string
+    ray: ProjectileName
+    x: number
+    y: number
+}
+
 /** Signal to change the map, and center it at the coordinates provided */
 export type MapData = {
     map: MapName
@@ -63,6 +72,7 @@ export type ServerToClientEvents = {
     "monster": (MonsterData: UIMonsterData) => void
     "newTab": (tabName: string) => void
     "projectile": (projectileData: UIProjectileData) => void
+    "ray": (rayData: UIRayData) => void
     "remove": (entityID: string) => void
     "removeAll": () => void
     "removeTab": (tabName: string) => void

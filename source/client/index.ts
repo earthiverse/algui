@@ -1,4 +1,4 @@
-import { GData, GGeometry, MapName } from "alclient"
+import { GData, MapName } from "alclient"
 import * as PIXI from "pixi.js"
 import { Stage } from "@pixi/layers"
 import { Viewport } from "pixi-viewport"
@@ -7,10 +7,10 @@ import * as SocketIO from "socket.io-client"
 import "./index.css"
 import { renderMap } from "./map"
 import { removeAllSprites, removeSprite, renderCharacter, renderMonster } from "./sprite"
-import { UICharacterData, ClientToServerEvents, MapData, UIMonsterData, ServerToClientEvents, UIProjectileData } from "../definitions/server"
+import { UICharacterData, ClientToServerEvents, MapData, UIMonsterData, ServerToClientEvents, UIProjectileData, UIRayData } from "../definitions/server"
 import { Layers } from "../definitions/client"
 import G from "../G.json"
-import { renderProjectile } from "./projectile"
+import { renderProjectile, renderRay } from "./projectile"
 
 // Setup web font loader
 PIXI.Loader.registerPlugin(new WebfontLoaderPlugin())
@@ -192,6 +192,9 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     })
     socket.on("projectile", (data: UIProjectileData) => {
         renderProjectile(layers, data)
+    })
+    socket.on("ray", (data: UIRayData) => {
+        renderRay(layers, data)
     })
     socket.on("remove", (id: string) => {
         removeSprite(id)

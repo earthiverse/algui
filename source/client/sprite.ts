@@ -46,7 +46,7 @@ function animate() {
             }
 
             // Reduce alpha until it's 0, then destroy the sprite object
-            datum.sprite.alpha = datum.sprite.alpha - 0.1
+            datum.sprite.alpha = datum.sprite.alpha - PIXI.Ticker.shared.elapsedMS / 500
             if (datum.sprite.alpha <= 0) monstersToDelete.push(id)
             continue
         }

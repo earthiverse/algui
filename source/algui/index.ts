@@ -7,7 +7,7 @@ import { fileURLToPath } from "url"
 import Path, { dirname } from "path"
 import * as SocketIO from "socket.io"
 import { Socket } from "socket.io-client"
-import { UICharacterData, UIMonsterData, MapData, UIData, ServerToClientEvents, ClientToServerEvents, UIProjectileData } from "../definitions/server"
+import { UICharacterData, UIMonsterData, MapData, UIData, ServerToClientEvents, ClientToServerEvents, UIProjectileData, UIRayData } from "../definitions/server"
 import { ActionDataProjectile } from "alclient"
 import { ActionDataRay } from "alclient"
 
@@ -74,7 +74,15 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 if (args.ray) {
                     const data = args as ActionDataRay
 
-                    // TODO: We don't have code to render rays yet
+                    const rayData: UIRayData = {
+                        going_x: data.x,
+                        going_y: data.y,
+                        pid: data.pid,
+                        ray: data.ray,
+                        x: attacker.x,
+                        y: attacker.y
+                    }
+                    io.to(tabName).emit("ray", rayData)
                 } else if (args.projectile) {
                     const data = args as ActionDataProjectile
 

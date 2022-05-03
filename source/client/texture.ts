@@ -297,6 +297,13 @@ export const getProjectileTextures = (projectile: ProjectileName) => {
     return getAnimationTextures(gProjectile.animation)
 }
 
+export const getRayTexture = (projectile: ProjectileName) => {
+    const gProjectile = (G as unknown as GData).projectiles[projectile]
+    const texture = getAnimationTextures(gProjectile.animation)[0]
+    texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT
+    return texture
+}
+
 const skinColorTexturesCache = new Map<string, PIXI.Texture[][]>()
 export const getSkinColorTextures = (headSkin: string): PIXI.Texture[][] => {
     let textures = skinColorTexturesCache.get(headSkin)
