@@ -86,7 +86,7 @@ export function renderProjectile(layers: Layers, projectile: UIProjectileData): 
 
     // Update position
     sprite.anchor.set(0.5, 0.5)
-    sprite.rotation = movementAngle
+    sprite.rotation = movementAngle - (Math.PI / 2)
     sprite.x = projectile.x
     sprite.y = projectile.y
     sprite.zIndex = projectile.y
