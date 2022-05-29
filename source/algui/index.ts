@@ -64,6 +64,25 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
             players: new Map() })
         io.emit("newTab", tabName)
     }
+    characterSocket.onAnyOutgoing((eventName, args) => {
+        const id = tabName
+        switch (eventName) {
+            case "move": {
+                const moveData = args as { going_x: number, going_y: number, x: number, y: number }
+                const tabData = observers.get(tabName)
+                const playerData = tabData.players.get(id)
+                if (!playerData) return // We don't have enough data to update
+
+                // Update the data
+                playerData.going_x = moveData.going_x
+                playerData.going_y = moveData.going_y
+                playerData.x = moveData.x
+                playerData.y = moveData.y
+
+                io.to(tabName).emit("character", playerData)
+            }
+        }
+    })
     characterSocket.onAny((eventName, args) => {
         switch (eventName) {
             case "action": {

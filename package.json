@@ -27,14 +27,14 @@
     "pixi-viewport": "^4.34.4",
     "pixi-webfont-loader": "^1.0.2",
     "pixi.js": "^6.3.0",
-    "socket.io": "^4.4.1",
-    "socket.io-client": "^4.4.1"
+    "socket.io": "^4.5.1",
+    "socket.io-client": "^4.5.1"
   },
   "devDependencies": {
     "@types/offscreencanvas": "^2019.6.4",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.18.0",
-    "alclient": "^0.9.80",
+    "alclient": "^0.13.4",
     "copy-webpack-plugin": "^10.2.4",
     "copyfiles": "^2.4.1",
     "css-loader": "^6.7.1",

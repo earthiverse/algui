@@ -54,15 +54,15 @@ function animate() {
         // Movement Computation
         const movementAngle = Math.atan2(datum.data.going_y - datum.data.y, datum.data.going_x - datum.data.x)
         if (datum.data.moving) {
-            const distanceTravelled = datum.data.speed * PIXI.Ticker.shared.elapsedMS / 1000
+            const distanceTraveled = datum.data.speed * PIXI.Ticker.shared.elapsedMS / 1000
             const distanceToGoal = Math.hypot(datum.data.going_x - datum.data.x, datum.data.going_y - datum.data.y)
-            if (distanceTravelled > distanceToGoal) {
+            if (distanceTraveled > distanceToGoal) {
                 datum.data.moving = false
                 datum.data.x = datum.data.going_x
                 datum.data.y = datum.data.going_y
             } else {
-                datum.data.x = datum.data.x + Math.cos(movementAngle) * distanceTravelled
-                datum.data.y = datum.data.y + Math.sin(movementAngle) * distanceTravelled
+                datum.data.x = datum.data.x + Math.cos(movementAngle) * distanceTraveled
+                datum.data.y = datum.data.y + Math.sin(movementAngle) * distanceTraveled
             }
         }
         datum.sprite.x = datum.data.x - datum.sprite.width / 2
@@ -127,15 +127,15 @@ function animate() {
         // Movement Computation
         const angle = Math.atan2(datum.data.going_y - datum.data.y, datum.data.going_x - datum.data.x)
         if (datum.data.moving) {
-            const distanceTravelled = datum.data.speed * PIXI.Ticker.shared.elapsedMS / 1000
+            const distanceTraveled = datum.data.speed * PIXI.Ticker.shared.elapsedMS / 1000
             const distanceToGoal = Math.hypot(datum.data.going_x - datum.data.x, datum.data.going_y - datum.data.y)
-            if (distanceTravelled > distanceToGoal) {
+            if (distanceTraveled > distanceToGoal) {
                 datum.data.moving = false
                 datum.data.x = datum.data.going_x
                 datum.data.y = datum.data.going_y
             } else {
-                datum.data.x = datum.data.x + Math.cos(angle) * distanceTravelled
-                datum.data.y = datum.data.y + Math.sin(angle) * distanceTravelled
+                datum.data.x = datum.data.x + Math.cos(angle) * distanceTraveled
+                datum.data.y = datum.data.y + Math.sin(angle) * distanceTraveled
             }
         }
         datum.sprite.x = datum.data.x - datum.sprite.width / 2
