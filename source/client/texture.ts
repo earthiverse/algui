@@ -29,6 +29,7 @@ export const getAnimationTextures = (animation: AnimationName) => {
         const frame = new PIXI.Rectangle(x, 0, frame_width, frame_height)
         textures.push(new PIXI.Texture(baseTexture, frame))
     }
+    animationTexturesCache.set(animation, textures)
     return textures
 }
 

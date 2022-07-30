@@ -132,6 +132,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
         foreground: PIXI.Container
     }>()
     socket.on("map", (data: MapData) => {
+        viewport.plugins.remove("follow")
         currentMap = data.map
         text.text = `map: ${data.map}, x: ${data.x.toFixed(2)}, y: ${data.y.toFixed(2)}`
         console.log(`Switching map to ${data.map},${data.x},${data.y}`)
