@@ -21,15 +21,19 @@ export const getAnimationTextures = (animation: AnimationName) => {
     const gAnimation = (G as unknown as GData).animations[animation]
     const file = gAnimation.file.split(/[?#]/)[0]
     const baseTexture = getBaseTexture(animation, `.${file}`)
+
     textures = []
-    const frame_width = baseTexture.width / gAnimation.frames
-    const frame_height = baseTexture.height
-    for (let i = 0; i < gAnimation.frames; i++) {
-        const x = i * frame_width
-        const frame = new PIXI.Rectangle(x, 0, frame_width, frame_height)
-        textures.push(new PIXI.Texture(baseTexture, frame))
-    }
+    baseTexture.addListener("loaded", () => {
+        const frame_width = baseTexture.width / gAnimation.frames
+        const frame_height = baseTexture.height
+        for (let i = 0; i < gAnimation.frames; i++) {
+            const x = i * frame_width
+            const frame = new PIXI.Rectangle(x, 0, frame_width, frame_height)
+            textures.push(new PIXI.Texture(baseTexture, frame))
+        }
+    })
     animationTexturesCache.set(animation, textures)
+
     return textures
 }
 
@@ -83,7 +87,6 @@ export const getCosmeticHairTextures = (skin: string) => {
     let textures = cosmeticHairTexturesCache.get(skin)
     if (textures) return textures
 
-    // TODO: Implement
     const gSprites = (G as unknown as GData).sprites
     let found = false
     for (const spriteName in gSprites) {

@@ -39,7 +39,7 @@ function animate() {
     for (const pid of projectilesToDelete) {
         const datum = projectiles.get(pid)
         if (datum) {
-            datum.sprite.destroy({ children: true })
+            datum.sprite.destroy({ baseTexture: false, children: true, texture: false })
             projectiles.delete(pid)
         }
     }
@@ -53,7 +53,7 @@ function animate() {
     for (const pid of raysToDelete) {
         const datum = rays.get(pid)
         if (datum) {
-            datum.sprite.destroy({ children: true })
+            datum.sprite.destroy({ baseTexture: false, children: true, texture: false })
             rays.delete(pid)
         }
     }
@@ -69,6 +69,7 @@ export function renderProjectile(layers: Layers, projectile: UIProjectileData): 
         sprite = oldProjectile.sprite
     } else {
         const textures = getProjectileTextures(projectile.projectile)
+        console.log(textures)
         sprite = new PIXI.AnimatedSprite(textures)
         // sprite.cullable = true
         sprite.interactive = false

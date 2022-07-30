@@ -117,8 +117,8 @@ function animate() {
     for (const id of monstersToDelete) {
         const datum = monsters.get(id)
         if (datum) {
-            datum.hpBar.destroy()
-            datum.sprite.destroy({ children: true })
+            datum.hpBar.destroy({ baseTexture: false, children: true, texture: false })
+            datum.sprite.destroy({ baseTexture: false, children: true, texture: false })
             monsters.delete(id)
         }
     }
@@ -227,8 +227,8 @@ function radsToDirection(angle: number): number {
 export function removeSprite(id: string) {
     const character = characters.get(id)
     if (character) {
-        character.hpBar.destroy()
-        character.sprite.destroy({ children: true })
+        character.hpBar.destroy({ baseTexture: false, children: true, texture: false })
+        character.sprite.destroy({ baseTexture: false, children: true, texture: false })
         characters.delete(id)
         return
     }
@@ -240,13 +240,13 @@ export function removeSprite(id: string) {
 
 export function removeAllSprites() {
     for (const [, character] of characters) {
-        character.hpBar.destroy()
-        character.sprite.destroy({ children: true })
+        character.hpBar.destroy({ baseTexture: false, children: true, texture: false })
+        character.sprite.destroy({ baseTexture: false, children: true, texture: false })
     }
     characters.clear()
     for (const [, monster] of monsters) {
-        monster.hpBar.destroy()
-        monster.sprite.destroy({ children: true })
+        monster.hpBar.destroy({ baseTexture: false, children: true, texture: false })
+        monster.sprite.destroy({ baseTexture: false, children: true, texture: false })
     }
     monsters.clear()
 }
