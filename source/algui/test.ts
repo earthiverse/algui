@@ -2,7 +2,7 @@ import AL from "alclient"
 import { startServer, addSocket } from "./index.js"
 
 async function run() {
-    await AL.Game.loginJSONFile("../../credentials.json")
+    await AL.Game.loginJSONFile("./credentials.json")
     const G = await AL.Game.getGData(true, false)
     startServer(8080, G)
     const observer = await AL.Game.startObserver("US", "I")

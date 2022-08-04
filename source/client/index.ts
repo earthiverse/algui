@@ -47,7 +47,7 @@ function resize() {
 resize()
 
 // Preload font
-PIXI.Loader.shared.add({ name: "m5x7", url: "./assets/m5x7.woff2" })
+PIXI.Loader.shared.add({ name: "m5x7", url: "./assets/m5x7.ttf" })
 
 // Preload images
 for (const name in (G as unknown as GData).tilesets) {
@@ -66,9 +66,9 @@ for (const name in (G as unknown as GData).sprites) {
 PIXI.Loader.shared.load().onComplete.add(() => {
     // Show x/y coordinates
     let currentMap = undefined
-    const text = new PIXI.Text("map: undefined, x: 0.00, y: 0.00", { fill: "white", fontFamily: "m5x7", fontSize: 28, lineHeight: 28, lineJoin: "round", strokeThickness: 5 })
+    const text = new PIXI.Text("map: undefined, x: 0.00, y: 0.00", { fill: "white", fontFamily: "m5x7", fontSize: 48, lineHeight: 48, lineJoin: "round" })
     text.anchor.set(0, 0)
-    text.zIndex = 3
+    text.zIndex = 4
     app.stage.addChild(text)
     PIXI.Ticker.shared.add(() => {
         const mouse = app.renderer.plugins.interaction.mouse.getLocalPosition(viewport)
@@ -81,10 +81,15 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     hpBars.zIndex = 2
     viewport.addChild(hpBars)
 
+    const idTags = new PIXI.Container()
+    idTags.zIndex = 3
+    viewport.addChild(idTags)
+
     const layers: Layers = {
         background: undefined,
         foreground: undefined,
         hpBars: hpBars,
+        idTags: idTags,
         viewport: viewport
     }
 
@@ -172,13 +177,6 @@ PIXI.Loader.shared.load().onComplete.add(() => {
 
             lastMap = data.map
         }
-        // const geometry: GGeometry = (G as unknown as GData).geometry[data.map]
-        // viewport.clamp({
-        //     bottom: geometry.max_y,
-        //     left: geometry.min_x,
-        //     right: geometry.max_x,
-        //     top: geometry.min_y
-        // })
         viewport.moveCenter(data.x, data.y)
         viewport.dirty = true
     })

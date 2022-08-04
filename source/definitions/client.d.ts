@@ -5,5 +5,6 @@ export type Layers = {
     background: Container
     foreground: Container
     hpBars: Container
+    idTags: Container
     viewport: Viewport
 }
