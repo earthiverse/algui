@@ -1,13 +1,17 @@
 import { BankInfo, CXData, MapName, ProjectileName, StatusInfo } from "alclient"
 
 export type UICharacterData = {
+    ctype: string
     cx?: CXData
     hp: number
     id: string
     going_x: number
     going_y: number
+    level: number
     max_hp: number
+    max_mp: number
     moving: boolean
+    mp: number
     s: StatusInfo
     skin: string
     speed: number

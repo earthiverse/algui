@@ -20,6 +20,8 @@ export type CharacterSpriteData = {
     lastDirection: number
     focusedHover?: boolean
     hpBar: PIXI.Graphics
+    idTag: PIXI.Graphics
+    manaBar: PIXI.Graphics
     sprite: PIXI.AnimatedSprite
     textures: PIXI.Texture[][]
     texturesChildren: {
@@ -27,7 +29,8 @@ export type CharacterSpriteData = {
     }
 }
 
-let focused: string
+let focusedChar: string
+let focusedMon: string
 const monsters = new Map<string, MonsterSpriteData>()
 const characters = new Map<string, CharacterSpriteData>()
 function animate() {
@@ -104,12 +107,13 @@ function animate() {
 
         // Update HP Bar
         const hpBar = datum.hpBar
-        hpBar.visible = (focused == datum.data.id) || (datum.focusedHover ?? false)
+        hpBar.visible = (focusedMon == datum.data.id) || (datum.focusedHover ?? false)
         if (hpBar.visible) {
             hpBar.clear()
-            hpBar.beginFill(0x000000).lineStyle(0).drawRect(datum.sprite.x, datum.sprite.y - 4, datum.sprite.width, 4)
-                .beginFill(0xFF0000).lineStyle(0).drawRect(datum.sprite.x + 1, datum.sprite.y - 3, (datum.sprite.width - 2) * datum.data.hp / datum.data.max_hp, 2)
-            hpBar.scale.set(1 / datum.sprite.scale.x, 1 / datum.sprite.scale.y)
+            const spriteHalfWidth = datum.sprite.width / 2
+            hpBar.beginFill(0x888888).lineStyle(1, 0x888888, 1, 1, true).drawRect(datum.sprite.x - (20 - spriteHalfWidth), datum.sprite.y - 12, 40, 10)
+                .beginFill(0x000000).lineStyle(1, 0x000000, 1, 1, true).drawRect(datum.sprite.x - (18 - spriteHalfWidth), datum.sprite.y - 10, 36, 6)
+                .beginFill(0xFF0000).lineStyle(1, 0xFF0000, 1, 1, true).drawRect(datum.sprite.x - (16 - spriteHalfWidth), datum.sprite.y - 8, 32 * (datum.data.hp / datum.data.max_hp), 2)
         }
 
         datum.sprite.zIndex = datum.data.y
@@ -197,16 +201,63 @@ function animate() {
             removeFilter(datum.sprite, BURNED_FILTER)
         }
 
-        // Update HP Bar
+        // Update Stat Bars
         const hpBar = datum.hpBar
-        hpBar.visible = (focused == datum.data.id) || (datum.focusedHover ?? false)
+        const manaBar = datum.manaBar
+        hpBar.visible = (focusedChar == datum.data.id) || (datum.focusedHover ?? false)
+        manaBar.visible = (focusedChar == datum.data.id)
         if (hpBar.visible) {
             hpBar.clear()
-            hpBar.beginFill(0x000000).lineStyle(0).drawRect(datum.sprite.x, datum.sprite.y - 4, datum.sprite.width, 4)
-                .beginFill(0xFF0000).lineStyle(0).drawRect(datum.sprite.x + 1, datum.sprite.y - 3, (datum.sprite.width - 2) * datum.data.hp / datum.data.max_hp, 2)
-            hpBar.scale.set(1 / datum.sprite.scale.x, 1 / datum.sprite.scale.y)
+            const spriteHalfWidth = datum.sprite.width / 2
+            hpBar.beginFill(0x888888).lineStyle(1, 0x888888, 1, 1, true).drawRect(datum.sprite.x - (20 - spriteHalfWidth), datum.sprite.y - 30, 40, 10)
+                .beginFill(0x000000).lineStyle(1, 0x000000, 1, 1, true).drawRect(datum.sprite.x - (18 - spriteHalfWidth), datum.sprite.y - 28, 36, 6)
+                .beginFill(0xFF0000).lineStyle(1, 0xFF0000, 1, 1, true).drawRect(datum.sprite.x - (16 - spriteHalfWidth), datum.sprite.y - 26, 32 * (datum.data.hp / datum.data.max_hp), 2)
+        }
+        if (manaBar.visible) {
+            manaBar.clear()
+            const spriteHalfWidth = datum.sprite.width / 2
+            manaBar.beginFill(0x888888).lineStyle(1, 0x888888, 1, 1, true).drawRect(datum.sprite.x - (20 - spriteHalfWidth), datum.sprite.y - 6, 40, 10)
+                .beginFill(0x000000).lineStyle(1, 0x000000, 1, 1, true).drawRect(datum.sprite.x - (18 - spriteHalfWidth), datum.sprite.y - 4, 36, 6)
+                .beginFill(0x0000FF).lineStyle(1, 0x0000FF, 1, 1, true).drawRect(datum.sprite.x - (16 - spriteHalfWidth), datum.sprite.y - 2, 32 * (datum.data.mp / datum.data.max_mp), 2)
         }
 
+        // Update ID tag
+        const idTag = datum.idTag
+        const idText = new PIXI.Text(datum.data.id, new PIXI.TextStyle({ align: "center", fill: 0xFFFFFF, fontFamily: "m5x7", fontSize: 24 }))
+        const idClass = new PIXI.Text(datum.data.ctype[0].toUpperCase(), new PIXI.TextStyle({ align: "center", fill: getClassColor(datum.data.ctype), fontFamily: "m5x7", fontSize: 24 }))
+        const idLvl = new PIXI.Text(datum.data.level.toString(), new PIXI.TextStyle({ align: "center", fill: 0xFFFFFF, fontFamily: "m5x7", fontSize: 24 }))
+        idText.blendMode = PIXI.BLEND_MODES.NORMAL_NPM
+        idClass.blendMode = PIXI.BLEND_MODES.NORMAL_NPM
+        idLvl.blendMode = PIXI.BLEND_MODES.NORMAL_NPM
+        idText.scale.set(0.5)
+        idClass.scale.set(0.5)
+        idLvl.scale.set(0.5)
+        idText.roundPixels = true
+        idClass.roundPixels = true
+        idLvl.roundPixels = true
+        idTag.visible = datum.sprite.visible
+        idClass.visible = (focusedChar == datum.data.id) || (datum.focusedHover ?? false)
+        idLvl.visible = idClass.visible
+        idText.x = datum.sprite.x - ((idText.width / 2) - (datum.sprite.width / 2))
+        idClass.x = idText.x - (idClass.width + 6)
+        idLvl.x = (idText.x + idText.width) + 6
+        idText.y = datum.sprite.y - 18
+        idClass.y = idText.y
+        idLvl.y = idText.y
+        idTag.clear()
+        idTag.blendMode = PIXI.BLEND_MODES.NORMAL_NPM
+        idTag.beginFill(0x888888).lineStyle(1, 0x888888, 1, 1, true).drawRect(idText.x - 4, idText.y - 4, idText.width + 8, idText.height + 8)
+            .beginFill(0x000000).lineStyle(1, 0x000000, 1, 1, true).drawRect(idText.x - 2, idText.y - 2, idText.width + 4, idText.height + 4)
+        if (idClass.visible) {
+            idTag.beginFill(0x888888).lineStyle(1, 0x888888, 1, 1, true).drawRect(idClass.x - 4, idClass.y - 4, idClass.width + 8, idClass.height + 8)
+                .beginFill(0x000000).lineStyle(1, 0x000000, 1, 1, true).drawRect(idClass.x - 2, idClass.y - 2, idClass.width + 4, idClass.height + 4)
+                .beginFill(0x888888).lineStyle(1, 0x888888, 1, 1, true).drawRect(idLvl.x - 4, idLvl.y - 4, idLvl.width + 8, idLvl.height + 8)
+                .beginFill(0x000000).lineStyle(1, 0x000000, 1, 1, true).drawRect(idLvl.x - 2, idLvl.y - 2, idLvl.width + 4, idLvl.height + 4)
+        }
+        for (const child of idTag.children) {
+            child.destroy()
+        }
+        idTag.addChild(idText, idClass, idLvl)
         datum.sprite.zIndex = datum.data.y
     }
 }
@@ -228,6 +279,8 @@ export function removeSprite(id: string) {
     const character = characters.get(id)
     if (character) {
         character.hpBar.destroy({ baseTexture: false, children: true, texture: false })
+        character.manaBar.destroy({ baseTexture: false, children: true, texture: false })
+        character.idTag.destroy({ baseTexture: false, children: true, texture: false })
         character.sprite.destroy({ baseTexture: false, children: true, texture: false })
         characters.delete(id)
         return
@@ -241,7 +294,9 @@ export function removeSprite(id: string) {
 export function removeAllSprites() {
     for (const [, character] of characters) {
         character.hpBar.destroy({ baseTexture: false, children: true, texture: false })
+        character.manaBar.destroy({ baseTexture: false, children: true, texture: false })
         character.sprite.destroy({ baseTexture: false, children: true, texture: false })
+        character.idTag.destroy({ baseTexture: false, children: true, texture: false })
     }
     characters.clear()
     for (const [, monster] of monsters) {
@@ -282,16 +337,25 @@ export function renderCharacter(layers: Layers, character: UICharacterData, init
 
         // Add hp bar (will be updated in animate loop)
         const hpBar = new PIXI.Graphics()
+        const manaBar = new PIXI.Graphics()
         hpBar.visible = false
-        sprite.on("click", () => { focused = character.id })
+        manaBar.visible = false
+        sprite.on("click", () => { focusedChar = character.id })
         sprite.on("mouseover", () => { datum.focusedHover = true })
         sprite.on("mouseout", () => { datum.focusedHover = false })
-        layers.hpBars.addChild(hpBar)
+        layers.hpBars.addChild(hpBar, manaBar)
+
+        // Add ID tag
+        const idTag = new PIXI.Graphics()
+        idTag.visible = false
+        layers.idTags.addChild(idTag)
 
         const datum: CharacterSpriteData = {
             data: character,
             hpBar: hpBar,
+            idTag: idTag,
             lastDirection: initialDirection,
+            manaBar: manaBar,
             sprite: sprite,
             textures: textures,
             texturesChildren: {}
@@ -434,7 +498,7 @@ export function renderMonster(layers: Layers, monster: UIMonsterData, initialDir
         // Add hp bar (will be updated in animate loop)
         const hpBar = new PIXI.Graphics()
         hpBar.visible = false
-        sprite.on("click", () => { focused = monster.id })
+        sprite.on("click", () => { focusedMon = monster.id })
         sprite.on("mouseover", () => { datum.focusedHover = true })
         sprite.on("mouseout", () => { datum.focusedHover = false })
         layers.hpBars.addChild(hpBar)
@@ -468,4 +532,17 @@ export function renderMonster(layers: Layers, monster: UIMonsterData, initialDir
     }
 
     return sprite
+}
+
+function getClassColor(ctype: string): PIXI.TextStyleFill {
+    switch (ctype) {
+        case "merchant": return 0x7F7F7F
+        case "mage": return 0x3E6EED
+        case "warrior": return 0xF07F2F
+        case "priest": return 0xEB4D82
+        case "ranger": return 0x8A512B
+        case "paladin": return 0xA3B4B9
+        case "rogue": return 0x44B75C
+        default: return 0xFFFFFF
+    }
 }
