@@ -1,5 +1,5 @@
 
-import { ActionData, CharacterData, ChestData, ChestOpenedData, DeathData, DisappearData, DisappearingTextData, EntitiesData, GameLogData, GData, HitData, NewMapData, WelcomeData } from "alclient"
+import { CharacterData, DeathData, DisappearData, EntitiesData, GData, NewMapData, WelcomeData } from "alclient"
 import Express from "express"
 import Http from "http"
 // import { diff } from "json-diff"
@@ -118,7 +118,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 break
             }
             case "chest_opened": {
-                const data = args as ChestOpenedData
+                //const data = args as ChestOpenedData
                 // TODO: Animate chest && remove
                 break
             }
@@ -138,7 +138,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 break
             }
             case "disappearing_text": {
-                const data = args as DisappearingTextData
+                //const data = args as DisappearingTextData
                 // TODO: Animate text?
                 break
             }
@@ -149,7 +149,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 break
             }
             case "drop": {
-                const data = args as ChestData
+                //const data = args as ChestData
                 // TODO: Animate chest
                 break
             }
@@ -206,13 +206,17 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 }
                 for (const player of data.players) {
                     const characterData: UICharacterData = {
+                        ctype: player.ctype,
                         cx: player.cx,
                         going_x: player.going_x,
                         going_y: player.going_y,
                         hp: player.hp,
                         id: player.id,
+                        level: player.level,
                         max_hp: player.max_hp,
+                        max_mp: player.max_mp,
                         moving: player.moving,
+                        mp: player.mp,
                         s: player.s || {},
                         skin: player.skin,
                         speed: player.speed,
@@ -250,12 +254,12 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 break
             }
             case "game_log": {
-                const data = args as GameLogData
+                //const data = args as GameLogData
                 // TODO: Animate game log message
                 break
             }
             case "hit": {
-                const data = args as HitData
+                //const data = args as HitData
                 // TODO: Animate projectile
                 break
             }
@@ -293,13 +297,17 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 }
                 for (const player of data.entities.players) {
                     const characterData: UICharacterData = {
+                        ctype: player.ctype,
                         cx: player.cx,
                         going_x: player.going_x,
                         going_y: player.going_y,
                         hp: player.hp,
                         id: player.id,
+                        level: player.level,
                         max_hp: player.max_hp,
+                        max_mp: player.max_mp,
                         moving: player.moving,
+                        mp: player.mp,
                         s: player.s || {},
                         skin: player.skin,
                         speed: player.speed,
@@ -321,13 +329,17 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 tabData.mapData.y = data.y
 
                 const characterData: UICharacterData = {
+                    ctype: data.ctype,
                     cx: data.cx,
                     going_x: data.going_x,
                     going_y: data.going_y,
                     hp: data.hp,
                     id: data.id,
+                    level: data.level,
                     max_hp: data.max_hp,
+                    max_mp: data.max_mp,
                     moving: data.moving,
+                    mp: data.mp,
                     s: data.s || {},
                     skin: data.skin,
                     speed: data.speed,
