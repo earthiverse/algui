@@ -9,7 +9,6 @@ import * as SocketIO from "socket.io"
 import { Socket } from "socket.io-client"
 import { UICharacterData, UIMonsterData, MapData, UIData, ServerToClientEvents, ClientToServerEvents, UIProjectileData, UIRayData } from "../definitions/server"
 import { ActionDataProjectile } from "alclient"
-import { ActionDataRay } from "alclient"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -90,19 +89,19 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 const attacker = tabData.players.get(args.attacker) ?? tabData.monsters.get(args.attacker)
                 if (!attacker) break // We don't know where the projectile originated
 
-                if (args.ray) {
-                    const data = args as ActionDataRay
+                if (G.projectiles[args.projectile]?.ray) {
+                    const data = args as ActionDataProjectile
 
                     const rayData: UIRayData = {
                         going_x: data.x,
                         going_y: data.y,
                         pid: data.pid,
-                        ray: data.ray,
+                        ray: data.projectile,
                         x: attacker.x,
                         y: attacker.y
                     }
                     io.to(tabName).emit("ray", rayData)
-                } else if (args.projectile) {
+                } else if (G.projectiles[args.projectile]?.animation) {
                     const data = args as ActionDataProjectile
 
                     const projectileData: UIProjectileData = {
@@ -178,29 +177,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         x: monster.x,
                         y: monster.y
                     }
-                    // const before = tabData.monsters.get(monster.id)
-                    // if (before) {
-                    //     // Compute and send the difference
-                    //     const d = diff(before, monsterData)
-                    //     if (!d || Object.keys(d).length == 0) return // No difference
-
-                    //     const newDiff: Partial<MonsterData> = {}
-                    //     for (const key in d) {
-                    //         if (key.endsWith("__deleted")) {
-                    //             newDiff[key] = undefined
-                    //             continue
-                    //         }
-                    //         if (!d["going_to"] && key == "x") continue // Ignore certain movements
-                    //         if (!d["going_to"] && key == "y") continue // Ignore certain movements
-                    //         newDiff[key] = d[key]["__new"]
-                    //     }
-                    //     if (Object.keys(newDiff).length > 0) {
-                    //         newDiff.id = monster.id
-                    //         io.to(tabName).emit("monster", newDiff)
-                    //     }
-                    // } else {
                     io.to(tabName).emit("monster", monsterData)
-                    // }
 
                     tabData.monsters.set(monsterData.id, monsterData)
                 }
@@ -225,29 +202,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                         y: player.y
                     }
 
-                    // const before = tabData.players.get(player.id)
-                    // if (before) {
-                    //     // Compute and send the difference
-                    //     const d = diff(before, characterData)
-                    //     if (!d || Object.keys(d).length == 0) return // No difference
-
-                    //     const newDiff: Partial<CharacterData> = {}
-                    //     for (const key in d) {
-                    //         if (key.endsWith("__deleted")) {
-                    //             newDiff[key] = undefined
-                    //             continue
-                    //         }
-                    //         if (!d["going_to"] && key == "x") continue // Ignore certain movements
-                    //         if (!d["going_to"] && key == "y") continue // Ignore certain movements
-                    //         newDiff[key] = d[key]["__new"]
-                    //     }
-                    //     if (Object.keys(newDiff).length > 0) {
-                    //         newDiff.id = player.id
-                    //         io.to(tabName).emit("character", newDiff)
-                    //     }
-                    // } else {
                     io.to(tabName).emit("character", characterData)
-                    // }
 
                     tabData.players.set(player.id, characterData)
                 }
@@ -354,29 +309,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                     io.to(tabName).emit("bank", data.user)
                 }
 
-                // const before = tabData.players.get(data.id)
-                // if (before) {
-                //     // Compute and send the difference
-                //     const d = diff(before, characterData)
-                //     if (!d || Object.keys(d).length == 0) return // No difference
-
-                //     const newDiff: Partial<CharacterData> = {}
-                //     for (const key in d) {
-                //         if (key.endsWith("__deleted")) {
-                //             newDiff[key] = undefined
-                //             continue
-                //         }
-                //         if (!d["going_to"] && key == "x") continue // Ignore certain movements
-                //         if (!d["going_to"] && key == "y") continue // Ignore certain movements
-                //         newDiff[key] = d[key]["__new"]
-                //     }
-                //     if (Object.keys(newDiff).length > 0) {
-                //         newDiff.id = characterData.id
-                //         io.to(tabName).emit("character", newDiff)
-                //     }
-                // } else {
                 io.to(tabName).emit("character", characterData)
-                // }
 
                 tabData.players.set(data.id, characterData)
                 break
@@ -393,17 +326,7 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 io.to(tabName).emit("map", mapData)
                 break
             }
-
-            // Sockets to ignore
-            // case "eval":
-            // case "game_event":
-            // case "ping_ack":
-            // case "server_info":
-            //     break
             default: {
-            //     console.log(`------------------------------ ${eventName} ------------------------------`)
-            //     console.log(JSON.stringify(args, undefined, 2))
-            //     console.log("--------------------------------------------------------------------------------")
                 break
             }
         }
