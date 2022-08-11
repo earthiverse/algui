@@ -220,8 +220,6 @@ function animate() {
                 .beginFill(0x000000).lineStyle(1, 0x000000, 1, 1, true).drawRect(datum.sprite.x - (18 - spriteHalfWidth), datum.sprite.y - 4, 36, 6)
                 .beginFill(0x0000FF).lineStyle(1, 0x0000FF, 1, 1, true).drawRect(datum.sprite.x - (16 - spriteHalfWidth), datum.sprite.y - 2, 32 * (datum.data.mp / datum.data.max_mp), 2)
         }
-        hpBar.zIndex = datum.data.y
-        manaBar.zIndex = datum.data.y
 
         // Update ID tag
         const idTag = datum.idTag

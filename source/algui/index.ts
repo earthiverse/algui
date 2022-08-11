@@ -1,6 +1,5 @@
 /* eslint-disable sort-keys */
-
-import { Character, CharacterData, DeathData, DisappearData, EntitiesData, GData, NewMapData, Observer, WelcomeData } from "alclient"
+import { ActionData, Character, CharacterData, ChestData, ChestOpenedData, DeathData, DisappearData, DisappearingTextData, EntitiesData, GameLogData, GData, HitData, NewMapData, Observer, WelcomeData } from "alclient"
 import Express from "express"
 import Http from "http"
 // import { diff } from "json-diff"

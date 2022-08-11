@@ -19,6 +19,7 @@ PIXI.Loader.registerPlugin(new WebfontLoaderPlugin())
 PIXI.settings.ROUND_PIXELS = true
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
 PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.LOW
+PIXI.settings.FILTER_RESOLUTION
 
 // Add the view to the DOM
 const app = new PIXI.Application({
@@ -68,7 +69,7 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     let currentMap = undefined
     const text = new PIXI.Text("map: undefined, x: 0.00, y: 0.00", { fill: "white", fontFamily: "m5x7", fontSize: 48, lineHeight: 48, lineJoin: "round" })
     text.anchor.set(0, 0)
-    text.zIndex = 400
+    text.zIndex = 4
     app.stage.addChild(text)
     PIXI.Ticker.shared.add(() => {
         const mouse = app.renderer.plugins.interaction.mouse.getLocalPosition(viewport)
@@ -78,11 +79,11 @@ PIXI.Loader.shared.load().onComplete.add(() => {
     })
 
     const hpBars = new PIXI.Container()
-    hpBars.zIndex = 200
+    hpBars.zIndex = 2
     viewport.addChild(hpBars)
 
     const idTags = new PIXI.Container()
-    idTags.zIndex = 300
+    idTags.zIndex = 3
     viewport.addChild(idTags)
 
     const layers: Layers = {
