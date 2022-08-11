@@ -220,6 +220,8 @@ function animate() {
                 .beginFill(0x000000).lineStyle(1, 0x000000, 1, 1, true).drawRect(datum.sprite.x - (18 - spriteHalfWidth), datum.sprite.y - 4, 36, 6)
                 .beginFill(0x0000FF).lineStyle(1, 0x0000FF, 1, 1, true).drawRect(datum.sprite.x - (16 - spriteHalfWidth), datum.sprite.y - 2, 32 * (datum.data.mp / datum.data.max_mp), 2)
         }
+        hpBar.zIndex = datum.data.y
+        manaBar.zIndex = datum.data.y
 
         // Update ID tag
         const idTag = datum.idTag
@@ -340,7 +342,13 @@ export function renderCharacter(layers: Layers, character: UICharacterData, init
         const manaBar = new PIXI.Graphics()
         hpBar.visible = false
         manaBar.visible = false
-        sprite.on("click", () => { focusedChar = character.id })
+        sprite.on("click", () => {
+            if (focusedChar != character.id) {
+                focusedChar = character.id
+            } else {
+                focusedChar = null
+            }
+        })
         sprite.on("mouseover", () => { datum.focusedHover = true })
         sprite.on("mouseout", () => { datum.focusedHover = false })
         layers.hpBars.addChild(hpBar, manaBar)
@@ -498,7 +506,13 @@ export function renderMonster(layers: Layers, monster: UIMonsterData, initialDir
         // Add hp bar (will be updated in animate loop)
         const hpBar = new PIXI.Graphics()
         hpBar.visible = false
-        sprite.on("click", () => { focusedMon = monster.id })
+        sprite.on("click", () => {
+            if (focusedMon != monster.id) {
+                focusedMon = monster.id
+            } else {
+                focusedMon = null
+            }
+        })
         sprite.on("mouseover", () => { datum.focusedHover = true })
         sprite.on("mouseout", () => { datum.focusedHover = false })
         layers.hpBars.addChild(hpBar)

@@ -19,7 +19,9 @@ module.exports = {
             filename: "[name].css",
             chunkFilename: "[id].css"
         }),
-        new HtmlWebpackPlugin(),
+        new HtmlWebpackPlugin({
+            title: "AdventureLand GUI"
+        }),
         new WebpackCdnPlugin({
             modules: [
                 {

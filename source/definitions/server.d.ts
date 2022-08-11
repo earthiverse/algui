@@ -1,4 +1,4 @@
-import { BankInfo, CXData, MapName, ProjectileName, StatusInfo } from "alclient"
+import { BankInfo, CXData, ItemData, MapName, ProjectileName, StatusInfo } from "alclient"
 
 export type UICharacterData = {
     ctype: string
@@ -55,6 +55,11 @@ export type UIRayData = {
     y: number
 }
 
+export type InventoryData = {
+    gold: number
+    items: ItemData[]
+}
+
 /** Signal to change the map, and center it at the coordinates provided */
 export type MapData = {
     map: MapName
@@ -67,11 +72,16 @@ export type UIData = {
     monsters: Map<string, UIMonsterData>
     players: Map<string, UICharacterData>
     bank?: BankInfo
+    items?: ItemData[]
+    gold?: number
 }
 
 export type ServerToClientEvents = {
-    "bank": (bankInfo: BankInfo) => void
+    "bank": (id: string, bankInfo: BankInfo) => void
     "character": (characterData: UICharacterData) => void
+    "inventory": (id: string, data: InventoryData) => void
+    "removeInv": () => void
+    "removeBank": () => void
     "map": (mapData: MapData) => void
     "monster": (MonsterData: UIMonsterData) => void
     "newTab": (tabName: string) => void

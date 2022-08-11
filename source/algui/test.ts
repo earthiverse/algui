@@ -5,6 +5,10 @@ async function run() {
     await AL.Game.loginJSONFile("./credentials.json")
     const G = await AL.Game.getGData(true, false)
     startServer(8080, G)
+
+    // const merchant = await AL.Game.startMerchant("StormSurge", "US", "III")
+    // addSocket("StormSurge", merchant.socket, merchant)
+
     const observer = await AL.Game.startObserver("US", "I")
     addSocket("US I", observer.socket, observer)
 

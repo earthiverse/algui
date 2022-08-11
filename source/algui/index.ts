@@ -1,5 +1,6 @@
+/* eslint-disable sort-keys */
 
-import { CharacterData, DeathData, DisappearData, EntitiesData, GData, NewMapData, WelcomeData } from "alclient"
+import { Character, CharacterData, DeathData, DisappearData, EntitiesData, GData, NewMapData, Observer, WelcomeData } from "alclient"
 import Express from "express"
 import Http from "http"
 // import { diff } from "json-diff"
@@ -7,7 +8,7 @@ import { fileURLToPath } from "url"
 import Path, { dirname } from "path"
 import * as SocketIO from "socket.io"
 import { Socket } from "socket.io-client"
-import { UICharacterData, UIMonsterData, MapData, UIData, ServerToClientEvents, ClientToServerEvents, UIProjectileData, UIRayData } from "../definitions/server"
+import { UICharacterData, UIMonsterData, MapData, UIData, ServerToClientEvents, ClientToServerEvents, UIProjectileData, UIRayData, InventoryData } from "../definitions/server"
 import { ActionDataProjectile } from "alclient"
 
 const __filename = fileURLToPath(import.meta.url)
@@ -44,15 +45,23 @@ export function startServer(port = 8080, g: GData) {
             if (tabData.mapData) connection.emit("map", tabData.mapData)
             for (const [, monsterData] of tabData.monsters) connection.emit("monster", monsterData)
             for (const [, characterData] of tabData.players) connection.emit("character", characterData)
-            if (tabData.bank) connection.emit("bank", tabData.bank)
+            if (tabData.items) connection.emit("inventory", newTab, { gold: tabData.gold, items: tabData.items })
+            else connection.emit("removeInv")
+            if (tabData.bank) connection.emit("bank", newTab, tabData.bank)
+            else connection.emit("removeBank")
         })
 
         for (const [tab] of observers) connection.emit("newTab", tab)
     })
 }
 
-export function addSocket(tabName: string, characterSocket: Socket, initialPosition: MapData = { map: "main", x: 0, y: 0 }) {
+export function addSocket(tabName: string, characterSocket: Socket, object: Character | Observer) {
     if (!observers.has(tabName)) {
+        const initialPosition: MapData = {
+            map: object.map,
+            x: object.x,
+            y: object.y
+        }
         observers.set(tabName, {
             mapData: {
                 map: initialPosition.map,
@@ -60,7 +69,10 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                 y: initialPosition.y
             },
             monsters: new Map(),
-            players: new Map() })
+            players: new Map(),
+            items: (object instanceof Character) ? object.items : undefined,
+            gold: (object instanceof Character) ? object.gold : undefined
+        })
         io.emit("newTab", tabName)
     }
     characterSocket.onAnyOutgoing((eventName, args) => {
@@ -303,10 +315,15 @@ export function addSocket(tabName: string, characterSocket: Socket, initialPosit
                     y: data.y
                 }
 
+                tabData.gold = data.gold
+                tabData.items = data.items
+
+                const invData: InventoryData = { gold: data.gold, items: data.items }
+                io.to(tabName).emit("inventory", tabName, invData)
+
                 if (data.user) {
                     // Update bank data
                     tabData.bank = data.user
-                    io.to(tabName).emit("bank", data.user)
                 }
 
                 io.to(tabName).emit("character", characterData)
