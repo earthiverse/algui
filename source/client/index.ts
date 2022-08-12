@@ -19,7 +19,6 @@ PIXI.Loader.registerPlugin(new WebfontLoaderPlugin())
 PIXI.settings.ROUND_PIXELS = true
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
 PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.LOW
-PIXI.settings.FILTER_RESOLUTION
 
 // Add the view to the DOM
 const app = new PIXI.Application({
