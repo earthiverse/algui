@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys */
-import { ActionData, Character, CharacterData, ChestData, ChestOpenedData, DeathData, DisappearData, DisappearingTextData, EntitiesData, GameLogData, GData, HitData, NewMapData, Observer, WelcomeData } from "alclient"
+import { ActionData, Character, CharacterData, ChestData, ChestOpenedData, DeathData, DisappearData, DisappearingTextData, EntitiesData, GameLogData, GData, HitData, Mage, NewMapData, Observer, Paladin, Priest, Ranger, Rogue, Warrior, WelcomeData } from "alclient"
 import Express from "express"
 import Http from "http"
 // import { diff } from "json-diff"
@@ -54,7 +54,7 @@ export function startServer(port = 8080, g: GData) {
     })
 }
 
-export function addSocket(tabName: string, characterSocket: Socket, object: Character | Observer) {
+export function addSocket(tabName: string, characterSocket: Socket, object: Observer | Warrior | Priest | Mage | Ranger | Rogue | Paladin) {
     if (!observers.has(tabName)) {
         const initialPosition: MapData = {
             map: object.map,
@@ -69,8 +69,18 @@ export function addSocket(tabName: string, characterSocket: Socket, object: Char
             },
             monsters: new Map(),
             players: new Map(),
-            items: (object instanceof Character) ? object.items : undefined,
-            gold: (object instanceof Character) ? object.gold : undefined
+            items: (object instanceof Warrior
+                || object instanceof Priest
+                || object instanceof Mage
+                || object instanceof Ranger
+                || object instanceof Rogue
+                || object instanceof Paladin) ? object.items : undefined,
+            gold: (object instanceof Warrior
+                || object instanceof Priest
+                || object instanceof Mage
+                || object instanceof Ranger
+                || object instanceof Rogue
+                || object instanceof Paladin) ? object.gold : undefined
         })
         io.emit("newTab", tabName)
     }
