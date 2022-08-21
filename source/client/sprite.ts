@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js"
 import { GData } from "alclient"
-import { getCosmeticFaceTextures, getCosmeticHairTextures, getCosmeticHatTextures, getCosmeticMakeupTextures, getSkinColorTextures, getSkinTextures, getSkinType } from "./texture"
+import { getCosmeticFaceTextures, getCosmeticHairTextures, getCosmeticHatTextures, getCosmeticHeadTextures, getCosmeticMakeupTextures, getSkinColorTextures, getSkinTextures, getSkinType } from "./texture"
 import G from "../G.json"
 import { Layers } from "../definitions/client"
 import { addFilter, BURNED_FILTER, POISONED_FILTER, removeFilter } from "./filters"
@@ -385,7 +385,7 @@ export function renderCharacter(layers: Layers, character: UICharacterData, init
 
             // Add head
             if (character.cx.head) {
-                const headTextures = getCosmeticMakeupTextures(character.cx.head)
+                const headTextures = getCosmeticHeadTextures(character.cx.head)
                 const head = new PIXI.AnimatedSprite(headTextures[initialDirection])
                 if (sprite.width !== head.width) head.x += (sprite.width - head.width)
                 head.y -= 0
